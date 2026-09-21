@@ -1,8 +1,9 @@
 # Comp Sci 30
 
 ## Demos
-- I'll put the first demo here in a bit
+- [Chessboard Demo](chessboard)
+- [Circles on the Screen](02-circles)
 
 
 ## Projects
-- firsy assignment will go here
+- first assignment will go here
