@@ -5,8 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-
-state = "wallInFront";
+let state = "playing";
  
 // Slider 
 let sliderWidth = 100;
@@ -17,7 +16,12 @@ let x, y, speed;
 let ballX, ballY, dx, dy;
 let radius = 20;
 
-async function setup() {
+// Buttons
+let buttonW = 200;
+let buttonH = 60;
+let buttonX, buttonY;
+
+function setup() {
   createCanvas(windowWidth, windowHeight);
 
 
@@ -29,8 +33,12 @@ async function setup() {
   // Ball
   ballX = width/2;
   ballY = height/2;
-  dx = 10;
-  dy = 10;
+  dx = 0;
+  dy = 5;
+
+  // Button positions
+  buttonX = width/2 - buttonW/2;
+  buttonY = height/2 + 40;
 
 }
 
@@ -38,10 +46,15 @@ async function setup() {
 
 function draw() {
   background(220);
-  movingSlider();
-  playSlider(); 
-  displayBall();
-  bounceIfNeeded();
+  if (state === "playing") {
+    movingSlider();
+    playSlider(); 
+    displayBall();
+    bounceIfNeeded();
+  }
+  else if (state === "gameOver") {
+    gameOverScreen();
+  }
 }
 
 function movingSlider() {
@@ -59,25 +72,65 @@ function playSlider() {
 }
 
 function bounceIfNeeded() {
-  if (ballX <= 0 + radius || ballX >= width - radius) {
-    dx *= -1;
+  if (ballX <= radius || ballX >= width - radius){ //checking left and right walls
+    dx = -dx;
+  }
+  if (ballY <= radius) {   //checking the top 
+    dy = -dy;
   }
 
-  if (ballY < radius) {
-    dy *= -1;
-  }
-
-  if (ballY + radius >= y && ballX >= x && ballX <= x + sliderWidth) {
-    dy *= -1;
+  if (dy > 0 && ballY + radius >=y && ballX >= x && ballX <= x + sliderWidth) {
     ballY = y - radius;
-    
+    dy = -dy -2;
+    speed += .1
+  
+    if (dx > 0) {
+      dx += 2;
+    }
+    else {
+      dx -= 2;
+    }
+  }
+  if (ballY > height) {
+    state = "gameOver";
   }
 }
 
- function displayBall() {
-  ballX += dx;
-  ballY += dy;
+function displayBall() {
+ballX += dx;
+ballY += dy;
 
-  fill("black")
-  circle(ballX, ballY, radius*2);
- }
+fill("black")
+circle(ballX, ballY, radius*2);
+}
+
+function gameOverScreen() {
+  fill("black");
+  textAlign(CENTER, CENTER);
+  textSize(48);
+  text("HAHAHA you lost", width / 2, height / 2 - 40);
+
+  // Restart button
+  rect(buttonX, buttonY, buttonW, buttonH);
+  fill("white");
+  textSize(24);
+  text("Restart", width / 2, buttonY + buttonH / 2);
+}
+
+function mousePressed() {
+  if (state === "gameOver") {
+    if (mouseX >= buttonX && mouseX <= buttonX + buttonW &&
+        mouseY >= buttonY && mouseY <= buttonY + buttonH) {
+      restartGame();
+    }
+  }
+}
+
+function restartGame() {
+  ballX = width / 2;
+  ballY = height / 4;
+  dx = 0;
+  dy = 5;
+  x = width / 2 - sliderWidth / 2;
+  state = "playing";
+}
