@@ -63,10 +63,10 @@ function movingSlider() {
 }
 
 function playSlider() {
-  if (keyIsDown(RIGHT_ARROW) && x < width - sliderWidth) {
+  if (keyIsDown(UP_ARROW) && x < width - sliderWidth) {
     x += speed;
   }
-  if (keyIsDown(LEFT_ARROW) && x > 0) {
+  if (keyIsDown(DOWN_ARROW) && x > 0) {
     x -= speed;
   }
 }
@@ -82,7 +82,7 @@ function bounceIfNeeded() {
   if (dy > 0 && ballY + radius >=y && ballX >= x && ballX <= x + sliderWidth) {
     ballY = y - radius;
     dy = -dy -2;
-    speed += .1
+    speed += 0.1;
   
     if (dx > 0) {
       dx += 2;
@@ -97,11 +97,11 @@ function bounceIfNeeded() {
 }
 
 function displayBall() {
-ballX += dx;
-ballY += dy;
+  ballX += dx;
+  ballY += dy;
 
-fill("black")
-circle(ballX, ballY, radius*2);
+  fill("black");
+  circle(ballX, ballY, radius*2);
 }
 
 function gameOverScreen() {
@@ -133,4 +133,8 @@ function restartGame() {
   dy = 5;
   x = width / 2 - sliderWidth / 2;
   state = "playing";
+}
+
+function displayScore() {
+
 }
