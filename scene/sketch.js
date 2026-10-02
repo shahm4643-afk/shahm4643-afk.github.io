@@ -122,10 +122,10 @@ function movingSlider() {
 }
 
 function playSlider() {
-  if (keyIsDown(RIGHT_ARROW) && x < width - sliderWidth) {
+  if ((keyIsDown(RIGHT_ARROW) || keyIsDown("d")) && x < width - sliderWidth) {
     x += speed;
   }
-  if (keyIsDown(LEFT_ARROW) && x > 0) {
+  if ((keyIsDown(LEFT_ARROW) || keyIsDown("a")) && x > 0) {
     x -= speed;
   }
 }
@@ -265,9 +265,9 @@ function keyPressed() {
     bgColor = "green";
     objColor = "black";
   }
-  if (key === "k") {
-    bgColor = "black";
-    objColor = "white";
+  if (key === "p") {
+    bgColor = "pink";
+    objColor = "black";
   }
   if (key === "w") {
     bgColor = "white";
