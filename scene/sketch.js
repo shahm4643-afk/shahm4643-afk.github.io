@@ -143,7 +143,7 @@ function infoScreen() {
   text("Move the slider: Left / Right arrows or A / D", width / 2, height / 2 - 120);
   text("Or click the slider and drag it with the mouse", width / 2, height / 2 - 80);
   text("Change background: B = blue, Y = yellow, R = red", width / 2, height / 2 - 20);
-  text("G = green, P = pink, W = white", width / 2, height / 2 + 20);
+  text("Press any letter to get a background color starting with it", width / 2, height / 2 + 20);
   text("Press ESC again to go back", width / 2, height / 2 + 100);
 }
 
