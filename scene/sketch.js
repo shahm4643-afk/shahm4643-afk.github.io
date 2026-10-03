@@ -2,38 +2,50 @@
 // Muhammad Abidi
 // Sep 27
 //
+
+
+// Reference:
+//https://www.w3schools.com/js/default.asp - used for syntax help
+//https://www.w3schools.com/tags/ref_colornames.asp - one color for each letter of the alphabet
+
 // Notes: I reused bouncing ball physics we used in class and 
 // changed it into something that could easily be used into my assignment
 
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
+// -I saved highScore in the browser by storeItem and getItem, so it 
+// stays after refreshing the shape.
+// -Balls bounce off the walls using abs so they cant get stuck in them.
+// -Used constrain so the slider could be dragged off the canvas. using 
+// helped me set a min and max value.
+
 
 
 let level = "easy";
 let state = "menu";
  
-// Slider 
+
 let sliderWidth = 120;
 let sliderHeight = 20;
 let x, y, speed;
 let draggingMouse = false;
 
-// Ball
+
 let ballX, ballY, dx, dy;
 let radius = 20;
 let startSpeed = 5;
 
-//Keyboard interaction
+
 let bgColor = 220;
 let SliderColor = "black";
 
-// Game info
+
 let lives = 3;
 let score = 0;
 let highScore = 0;
 let previousState = "menu";
 
-// Buttons
+
 let buttonW = 200;
 let buttonH = 60;
 let buttonX, buttonY, easyY, controlsY;
@@ -54,7 +66,7 @@ function setup() {
   // Button positions
   buttonX = width/ 2 - buttonW/2;
   easyY = height/2 - 80;
-  buttonY = height /2 + 40;
+  buttonY = height /2 ;
   controlsY = height / 2 + 120;
   homeX = width - homeW - 20;
   homeY = 20;  
@@ -115,10 +127,10 @@ function menuScreen() {
 function gameOverScreen() {
   fill(SliderColor);
   textSize(48);
-  text("GameOver", width / 2, height / 2 - 80);
+  text("GameOver", width / 2, height / 2 - 130);
   textSize(24);
-  text("Score: " + score, width / 2, height / 2 - 30);
-  text("Best: " + highScore, width / 2, height / 2 + 5);
+  text("Score: " + score, width / 2, height / 2 - 80);
+  text("Best: " + highScore, width / 2, height / 2 + 45);
 
   drawButton("Restart", buttonX, buttonY);
 }
@@ -137,7 +149,7 @@ function infoScreen() {
 }
 
 function displayScore() {
-  fill(SliderColor);
+  fill("grey");
   textSize(100);
   text(score, width / 2, height / 2);
 }
@@ -157,7 +169,7 @@ function drawButton(label, bx, by) {
   text(label, bx + buttonW / 2, by + buttonH / 2);
 }
 
-//moving the ball and slider
+//ball and slider
 function movingSlider() {
   fill(SliderColor);
   rect(x, y, sliderWidth, sliderHeight);
@@ -315,31 +327,41 @@ function mouseReleased() {
 //using keyboard
 
 function keyPressed() {
-  if (key === "b") {
-    bgColor = "blue";
-  }
-  if (key === "y") {
-    bgColor = "yellow";
-  }
-  if (key === "r") {
-    bgColor = "red";
-  }
-  if (key === "g") {
-    bgColor = "green";
-  }
-  if (key === "p") {
-    bgColor = "pink";
-  }
-  if (key === "w") {
-    bgColor = "white";
-  }
+  let k = key.toLowerCase();
 
-  if (keyCode === ESCAPE||keycode=== 27) {
+  if (k === "a") { bgColor = "aqua"; }
+  if (k === "b") { bgColor = "blue"; }
+  if (k === "c") { bgColor = "crimson"; }
+  if (k === "d") { bgColor = "deepskyblue"; }
+  if (k === "e") { bgColor = "lightgreen"; }      
+  if (k === "f") { bgColor = "fuchsia"; }
+  if (k === "g") { bgColor = "green"; }
+  if (k === "h") { bgColor = "hotpink"; }
+  if (k === "i") { bgColor = "indigo"; }
+  if (k === "j") { bgColor = "#00A86B"; }      
+  if (k === "k") { bgColor = "khaki"; }
+  if (k === "l") { bgColor = "lavender"; }
+  if (k === "m") { bgColor = "magenta"; }
+  if (k === "n") { bgColor = "navy"; }
+  if (k === "o") { bgColor = "orange"; }
+  if (k === "p") { bgColor = "pink"; }
+  if (k === "q") { bgColor = "#F7CAC9"; }      
+  if (k === "r") { bgColor = "red"; }
+  if (k === "s") { bgColor = "salmon"; }
+  if (k === "t") { bgColor = "teal"; }
+  if (k === "u") { bgColor = "#3F00FF"; }     
+  if (k === "v") { bgColor = "violet"; }
+  if (k === "w") { bgColor = "white"; }
+  if (k === "x") { bgColor = "#738678"; }     
+  if (k === "y") { bgColor = "yellow"; }
+  if (k === "z") { bgColor = "#39A78E"; } 
+
+  if (keyCode === 27) {
     if (state === "info") {
-      state = previousState;     // go back
+      state = previousState;     
     }
     else {
-      previousState = state;     // remember where we were
+      previousState = state;     
       state = "info";
       draggingMouse = false;
     }
@@ -347,9 +369,9 @@ function keyPressed() {
 }
 
 function drawHomeButton() {
-  fill(SliderColor);
+  noFill();
   rect(homeX, homeY, homeW, homeH);
-  fill(bgColor);
+  fill('black');
   textSize(18);
   text("Home", homeX + homeW / 2, homeY + homeH / 2);
 }
