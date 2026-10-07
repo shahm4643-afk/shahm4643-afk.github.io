@@ -12,3 +12,4 @@
 
 ## Projects
 - [Interactive Scene](scene)
+- [Arrays and object notation](array-object)
