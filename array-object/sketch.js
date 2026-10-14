@@ -16,17 +16,16 @@ let state = "menu";
 
 let sliderWidth = 120;
 let sliderHeight = 20;
-let x, y, speed;
+let sliderX, sliderY, sliderSpeed;
 let draggingMouse = false;
 
+let ballX, ballY, ballSpeedX, ballSpeedY;
+let previousBallY;
+let ballRadius = 20;
+let ballStartSpeed = 5;
 
-let ballX, ballY, dx, dy;
-let radius = 20;
-let startSpeed = 5;
-
-
-let bgColor = 220;
-let SliderColor = "black";
+let backgroundColor = 220;
+let sliderColor = "black";
 
 
 let lives = 3;
@@ -48,9 +47,9 @@ function setup() {
 
 
   // Slider
-  x = windowWidth/2 - sliderWidth/2;
-  y = windowHeight/1.1 - sliderHeight/2;
-  speed = 10;
+  sliderX = windowWidth/2 - sliderWidth/2;
+  sliderY = windowHeight/1.1 - sliderHeight/2;
+  sliderSpeed = 10;
 
   // Button positions
   buttonX = width/ 2 - buttonW/2;
@@ -75,7 +74,7 @@ function setup() {
 
 function draw() {
 
-  background(bgColor);
+  background(backgroundColor);
 
   if (state === "menu") {
     menuScreen();
@@ -83,8 +82,8 @@ function draw() {
   else if (state === "playing") {
     displayScore();
     displayLives();
-    movingSlider();
     playSlider(); 
+    movingSlider();
     displayBall();
     bounceIfNeeded();
   }
@@ -152,7 +151,9 @@ function displayLives() {
 function drawButton(label, bx, by) {
   fill(sliderColor);
   rect(bx, by, buttonW, buttonH);
-  fill(bgColor);
+  fill(backgroundColor);
+
+
   textSize(24);
   text(label, bx + buttonW / 2, by + buttonH / 2);
 }
@@ -164,74 +165,86 @@ function movingSlider() {
 }
 
 function playSlider() {
-  if ((keyIsDown(RIGHT_ARROW)) && sliderX < width - sliderWidth) {
-    x += speed;
+  if (keyIsDown(RIGHT_ARROW)) {
+    sliderX += sliderSpeed;
   }
-  if ((keyIsDown(LEFT_ARROW)) && sliderX > 0) {
-    x -= speed;
+
+  if (keyIsDown(LEFT_ARROW)) {
+    sliderX -= sliderSpeed;
   }
+
+  sliderX = constrain(sliderX, 0, width - sliderWidth);
 }
 
 
 //ball
 function displayBall() {
-  ballX += dx;
-  ballY += dy;
+  previousBallY = ballY;
+
+  ballX += ballSpeedX;
+  ballY += ballSpeedY;
 
   fill(sliderColor);
-  circle(ballX, ballY, radius * 2);
+  circle(ballX, ballY, ballRadius * 2);
 }
 
 function resetBall() {
   ballX = width / 2;
   ballY = height / 4;
-  dx = 0;
-  dy = startSpeed;
-  speed = 10;   // slider speed goes back to normal too
+  ballSpeedX = 0;
+  ballSpeedY = ballStartSpeed;
+  sliderSpeed = 10;   // slider speed goes back to normal too
 }
 
 function bounceIfNeeded() {
   // Left wall
-  if (ballX <= radius) {
-    ballX = radius;
-    dx = abs(dx);
+  if (ballX <= ballRadius) {
+    ballX = ballRadius;
+    ballSpeedX = abs(ballSpeedX);
   }
 
   // Right wall
-  if (ballX >= width - radius) {
-    ballX = width - radius;
-    dx = -abs(dx);
+  if (ballX >= width - ballRadius) {
+    ballX = width - ballRadius;
+    ballSpeedX = -abs(ballSpeedX);
   }
 
   // Top wall
-  if (ballY <= radius) {
-    ballY = radius;
-    dy = abs(dy);
+  if (ballY <= ballRadius) {
+    ballY = ballRadius;
+    ballSpeedY = abs(ballSpeedY);
   }
 
-  // Slider -only when the ball is moving down
-  if (dy > 0 && ballY + radius >= sliderY && ballX >= sliderX && ballX <= sliderX + sliderWidth) {
-    ballY = sliderY - radius;
-    dy = -dy - 2;
-    speed += 0.3;
+  // Check whether the ball crossed the slider's top from above
+  let wasAboveSlider = previousBallY + ballRadius <= sliderY;
+  let reachedSlider = ballY + ballRadius >= sliderY;
+  let isOverSlider = ballX >= sliderX && ballX <= sliderX + sliderWidth;
+
+  if (ballSpeedY > 0 && wasAboveSlider &&
+      reachedSlider && isOverSlider) {
+    ballY = sliderY - ballRadius;
+    ballSpeedY = -ballSpeedY - 2;
+    sliderSpeed += 0.3;
     score += 1;
 
-    if (dx === 0) {
-      dx = random([-2, 2]);   // first hit right or left to randomise
+    if (ballSpeedX === 0) {
+      ballSpeedX = random([-2, 2]);
     }
-    else if (dx > 0) {
-      dx += 2;
+    else if (ballSpeedX > 0) {
+      ballSpeedX += 2;
     }
     else {
-      dx -= 2;
+      ballSpeedX -= 2;
     }
   }
 
   // Ball fell off the bottom
   if (ballY > height) {
     lives -= 1;
+
     if (lives === 0) {
       state = "gameOver";
+
       if (score > highScore) {
         highScore = score;
         storeItem("highScore", highScore);
@@ -245,28 +258,27 @@ function bounceIfNeeded() {
 
 
 
+
 function startGame(chosenLevel) {
   level = chosenLevel;
 
   if (level === "easy") {
-    startSpeed = 5;
+    ballStartSpeed = 5;
   }
   else {
-    startSpeed = 8;   // ball drops faster for the harder level
+    ballStartSpeed = 8;
   }
 
   lives = 3;
   score = 0;
-  x = width / 2 - sliderWidth / 2;
+  sliderX = width / 2 - sliderWidth / 2;
+  draggingMouse = false;
   resetBall();
   state = "playing";
 }
 
-// interticing the mosue with the slider
 
-function isMouseOver(bx, by, w, h) {
-  return mouseX >= bx && mouseX <= bx + w && mouseY >= by && mouseY <= by + h;
-}
+
 
 
 function mousePressed() {
@@ -290,7 +302,7 @@ function mousePressed() {
     }
   }
   else if (state === "playing") {
-    if (isMouseOver(x, y, sliderWidth, sliderHeight)) {
+    if (isMouseOver(sliderX, sliderY, sliderWidth, sliderHeight)) {
       draggingMouse = true;
     }
   }
@@ -302,10 +314,14 @@ function mousePressed() {
 }
 
 function mouseDragged() {
-  if (draggingMouse) {
-    x = mouseX - sliderWidth / 2;
-    x = constrain(x, 0, width - sliderWidth);
+  if (draggingMouse && state === "playing") {
+    sliderX = mouseX - sliderWidth / 2;
+    sliderX = constrain(sliderX, 0, width - sliderWidth);
   }
+}
+
+function isMouseOver(bx, by, w, h) {
+  return mouseX >= bx && mouseX <= bx + w && mouseY >= by && mouseY <= by + h;
 }
 
 function mouseReleased() {
@@ -317,32 +333,32 @@ function mouseReleased() {
 function keyPressed() {
   let k = key.toLowerCase();
 
-  if (k === "a") { bgColor = "aqua"; }
-  if (k === "b") { bgColor = "blue"; }
-  if (k === "c") { bgColor = "crimson"; }
-  if (k === "d") { bgColor = "deepskyblue"; }
-  if (k === "e") { bgColor = "lightgreen"; }      
-  if (k === "f") { bgColor = "fuchsia"; }
-  if (k === "g") { bgColor = "green"; }
-  if (k === "h") { bgColor = "hotpink"; }
-  if (k === "i") { bgColor = "indigo"; }
-  if (k === "j") { bgColor = "#00A86B"; }      
-  if (k === "k") { bgColor = "khaki"; }
-  if (k === "l") { bgColor = "lavender"; }
-  if (k === "m") { bgColor = "magenta"; }
-  if (k === "n") { bgColor = "navy"; }
-  if (k === "o") { bgColor = "orange"; }
-  if (k === "p") { bgColor = "pink"; }
-  if (k === "q") { bgColor = "#F7CAC9"; }      
-  if (k === "r") { bgColor = "red"; }
-  if (k === "s") { bgColor = "salmon"; }
-  if (k === "t") { bgColor = "teal"; }
-  if (k === "u") { bgColor = "#3F00FF"; }     
-  if (k === "v") { bgColor = "violet"; }
-  if (k === "w") { bgColor = "white"; }
-  if (k === "x") { bgColor = "#738678"; }     
-  if (k === "y") { bgColor = "yellow"; }
-  if (k === "z") { bgColor = "#39A78E"; } 
+  if (k === "a") { backgroundColor = "aqua"; }
+  if (k === "b") { backgroundColor = "blue"; }
+  if (k === "c") { backgroundColor = "crimson"; }
+  if (k === "d") { backgroundColor = "deepskyblue"; }
+  if (k === "e") { backgroundColor = "lightgreen"; }      
+  if (k === "f") { backgroundColor = "fuchsia"; }
+  if (k === "g") { backgroundColor = "green"; }
+  if (k === "h") { backgroundColor = "hotpink"; }
+  if (k === "i") { backgroundColor = "indigo"; }
+  if (k === "j") { backgroundColor = "#00A86B"; }      
+  if (k === "k") { backgroundColor = "khaki"; }
+  if (k === "l") { backgroundColor = "lavender"; }
+  if (k === "m") { backgroundColor = "magenta"; }
+  if (k === "n") { backgroundColor = "navy"; }
+  if (k === "o") { backgroundColor = "orange"; }
+  if (k === "p") { backgroundColor = "pink"; }
+  if (k === "q") { backgroundColor = "#F7CAC9"; }      
+  if (k === "r") { backgroundColor = "red"; }
+  if (k === "s") { backgroundColor = "salmon"; }
+  if (k === "t") { backgroundColor = "teal"; }
+  if (k === "u") { backgroundColor = "#3F00FF"; }     
+  if (k === "v") { backgroundColor = "violet"; }
+  if (k === "w") { backgroundColor = "white"; }
+  if (k === "x") { backgroundColor = "#738678"; }     
+  if (k === "y") { backgroundColor = "yellow"; }
+  if (k === "z") { backgroundColor = "#39A78E"; } 
 
   if (keyCode === 27) {
     if (state === "info") {
