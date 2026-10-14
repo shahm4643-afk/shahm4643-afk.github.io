@@ -41,6 +41,8 @@ let homeW = 100;
 let homeH = 40;
 let homeX, homeY;
 
+let blocks = [];
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
@@ -60,14 +62,15 @@ function setup() {
   homeY = 20;  
 
   resetBall();
+  generateBlocks()
 
-
-
-  //Extra for experts
   let saved = getItem("highScore");
   if (saved !== null) {
     highScore = saved;
   }
+
+  generateBlocks();
+
 }
 
 
@@ -80,12 +83,20 @@ function draw() {
     menuScreen();
   }
   else if (state === "playing") {
+    
     displayScore();
     displayLives();
     playSlider(); 
     movingSlider();
     displayBall();
     bounceIfNeeded();
+
+    fill("red");
+    stroke("black");
+
+    for (let theBlock of blocks) {
+      rect(theBlock.x, theBlock.y, theBlock.w, theBlock.h);
+    }
   }
   else if (state === "gameOver") {
     gameOverScreen();
@@ -97,6 +108,8 @@ function draw() {
     drawHomeButton();
   }
 }
+
+
 
 //Screens
 function menuScreen() {
@@ -220,8 +233,7 @@ function bounceIfNeeded() {
   let reachedSlider = ballY + ballRadius >= sliderY;
   let isOverSlider = ballX >= sliderX && ballX <= sliderX + sliderWidth;
 
-  if (ballSpeedY > 0 && wasAboveSlider &&
-      reachedSlider && isOverSlider) {
+  if (ballSpeedY > 0 && wasAboveSlider && reachedSlider && isOverSlider) {
     ballY = sliderY - ballRadius;
     ballSpeedY = -ballSpeedY - 2;
     sliderSpeed += 0.3;
@@ -378,4 +390,30 @@ function drawHomeButton() {
   fill('black');
   textSize(18);
   text("Home", homeX + homeW / 2, homeY + homeH / 2);
+}
+
+
+function spawnBlock(leftSide, blockWidth, blockHeight) {
+  let theBlock = {
+    x: leftSide,
+    y: 60,
+    w: blockWidth,
+    h: blockHeight,
+  };
+
+  return theBlock;
+}
+
+function generateBlocks() {
+  blocks = [];
+
+  let numberOfBlocks = 10;
+  let numberOfRows = 5;
+  let blockWidth = width / numberOfBlocks;
+  let blockHeight = 30;
+
+  for (let i = 0; i < numberOfBlocks; i++) {
+    let theBlock = spawnBlock(blockWidth * i, blockWidth, blockHeight);
+    blocks.push(theBlock);
+  }
 }
