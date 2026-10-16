@@ -1,4 +1,4 @@
-// Arrays and Pnject notation project
+// Arrays and Object notation project
 // Muhammad Abidi
 // October , 2026
 
