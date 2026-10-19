@@ -26,13 +26,9 @@ let ballStartSpeed = 5;
 let backgroundColor = 220;
 let sliderColor = "black";
 
-
-
 let lives = 3;
 let score = 0;
 let highScore = 0;
-
-
 
 let buttonWidth = 200;
 let buttonHeight = 60;
@@ -122,8 +118,8 @@ function gameOverScreen() {
   text("Game Over", width / 2, height / 2 - 130);
 
   textSize(24);
-  text("Score: " + score, width / 2, height / 2 - 80);
-  text("Best: " + highScore, width / 2, height / 2 + 90);
+  text("Score: "           + score, width / 2, height / 2 - 80);
+  text("HighScore: "   + highScore, width / 2, height / 2 + 90);
 
   drawButton("Restart", buttonX, buttonY);
 }
@@ -162,9 +158,7 @@ function drawButton(label, buttonLeft, buttonTop) {
   fill(backgroundColor);
 
   textSize(24);
-  text(label,
-    buttonLeft + buttonWidth / 2,
-    buttonTop + buttonHeight / 2);
+  text(label, buttonLeft + buttonWidth / 2, buttonTop + buttonHeight / 2);
 }
 
 function drawHomeButton() {
@@ -243,13 +237,12 @@ function bounceIfNeeded() {
   let reachedSlider = ballY + ballRadius >= sliderY;
   let isOverSlider = ballX >= sliderX && ballX <= sliderX + sliderWidth;
 
-  if (ballSpeedY > 0 && wasAboveSlider &&
-      reachedSlider && isOverSlider) {
+  if (ballSpeedY > 0 && wasAboveSlider && reachedSlider && isOverSlider) {
     ballY = sliderY - ballRadius;
     ballSpeedY = -ballSpeedY;
 
-    score++;
-    updateHighScore();
+    // score++;
+    // updateHighScore();
 
     if (ballSpeedX === 0) {
       ballSpeedX = random([-3, 3]);
@@ -339,8 +332,6 @@ function mouseDragged() {
     sliderX = constrain(sliderX, 0, width - sliderWidth);
   }
 }
-
-
 
 function mouseReleased() {
   draggingMouse = false;
