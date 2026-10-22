@@ -226,6 +226,11 @@ function bounceIfNeeded() {
     speed += 0.3;
     score += 1;
 
+
+
+
+
+    
     if (dx === 0) {
       dx = random([-2, 2]);   // first hit right or left to randomise
     }

@@ -130,12 +130,9 @@ function infoScreen() {
   text("Controls", width / 2, height / 2 - 200);
 
   textSize(24);
-  text("Move the slider: Left / Right arrows",
-    width / 2, height / 2 - 120);
-  text("Or click the slider and drag it",
-    width / 2, height / 2 - 80);
-  text("Press ESC to open or close this screen",
-    width / 2, height / 2 + 20);
+  text("Move the slider: Left / Right arrows", width / 2, height / 2 - 120);
+  text("Or click the slider and drag it", width / 2, height / 2 - 80);
+  text("Press ESC to open or close this screen", width / 2, height / 2 + 20);
 }
 
 function displayScore() {
@@ -240,6 +237,7 @@ function bounceIfNeeded() {
   if (ballSpeedY > 0 && wasAboveSlider && reachedSlider && isOverSlider) {
     ballY = sliderY - ballRadius;
     ballSpeedY = -ballSpeedY;
+    ball
 
     // score++;
     // updateHighScore();
@@ -382,5 +380,11 @@ function displayBlocks() {
 
   for (let theBlock of blocks) {
     rect(theBlock.x, theBlock.y, theBlock.w, theBlock.h);
+  }
+}
+
+function checkBlockCollision() {
+  for (let block of blocks) { 
+    if (ci)
   }
 }
