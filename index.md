@@ -11,6 +11,7 @@
 - [terrain Generation](08-terrain)
 - [collision Library](09-collision)
 - [randomized Art](10-art)
+- [Images and sound fx](11-loading-assets)
 
 ## Projects
 - [Interactive Scene](scene)
