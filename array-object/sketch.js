@@ -68,7 +68,7 @@ function setup() {
 
 function draw() {
 
-  background(backgroundColor);
+  background(220);
 
   if (state === "menu") {
     menuScreen();
@@ -77,6 +77,10 @@ function draw() {
     playSlider();
     moveBall();
     bounceIfNeeded();
+
+    if (state === "playing") {
+      checkBlockCollisions();
+    }
 
     displayScore();
     displayLives();
@@ -118,7 +122,7 @@ function gameOverScreen() {
   text("Game Over", width / 2, height / 2 - 130);
 
   textSize(24);
-  text("Score: "           + score, width / 2, height / 2 - 80);
+  text("Score: "           + score, width / 2, height / 2 - 60);
   text("HighScore: "   + highScore, width / 2, height / 2 + 90);
 
   drawButton("Restart", buttonX, buttonY);
@@ -235,16 +239,20 @@ function bounceIfNeeded() {
   let isOverSlider = ballX >= sliderX && ballX <= sliderX + sliderWidth;
 
   if (ballSpeedY > 0 && wasAboveSlider && reachedSlider && isOverSlider) {
-    ballY = sliderY - ballRadius;
-    ballSpeedY = -ballSpeedY;
-    ball
+  ballY = sliderY - ballRadius;
 
-    // score++;
-    // updateHighScore();
+  ballSpeedY += 1;
+  ballSpeedY = -ballSpeedY;
 
-    if (ballSpeedX === 0) {
-      ballSpeedX = random([-3, 3]);
-    }
+  if (ballSpeedX === 0) {
+    ballSpeedX = random([-3, 3]);
+  }
+  else if (ballSpeedX > 0) {
+    ballSpeedX += 1;
+  }
+  else {
+    ballSpeedX -= 1;
+  }
   }
 
   if (ballY - ballRadius > height) {
@@ -383,8 +391,3 @@ function displayBlocks() {
   }
 }
 
-function checkBlockCollision() {
-  for (let block of blocks) { 
-    if (ci)
-  }
-}

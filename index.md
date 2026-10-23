@@ -12,6 +12,7 @@
 - [collision Library](09-collision)
 - [randomized Art](10-art)
 - [Images and sound fx](11-loading-assets)
+- [rough practice](practice)
 
 ## Projects
 - [Interactive Scene](scene)
