@@ -174,11 +174,11 @@ function drawHomeButton() {
 // Slider
 
 function playSlider() {
-  if (keyIsDown(RIGHT_ARROW)) {
+  if (keyIsDown("d")) {
     sliderX += sliderSpeed;
   }
 
-  if (keyIsDown(LEFT_ARROW)) {
+  if (keyIsDown("a")) {
     sliderX -= sliderSpeed;
   }
 
@@ -239,20 +239,21 @@ function bounceIfNeeded() {
   let isOverSlider = ballX >= sliderX && ballX <= sliderX + sliderWidth;
 
   if (ballSpeedY > 0 && wasAboveSlider && reachedSlider && isOverSlider) {
-  ballY = sliderY - ballRadius;
+    ballY = sliderY - ballRadius;
 
-  ballSpeedY += 1;
-  ballSpeedY = -ballSpeedY;
+    ballSpeedY += 0.5;
+    ballSpeedY = -ballSpeedY;
+    sliderSpeed += 1.5;
 
-  if (ballSpeedX === 0) {
-    ballSpeedX = random([-3, 3]);
-  }
-  else if (ballSpeedX > 0) {
-    ballSpeedX += 1;
-  }
-  else {
-    ballSpeedX -= 1;
-  }
+    if (ballSpeedX === 0) {
+      ballSpeedX = random([-3, 3]);
+    }
+    else if (ballSpeedX > 0) {
+      ballSpeedX += 1;
+    }
+    else {
+      ballSpeedX -= 1;
+    }
   }
 
   if (ballY - ballRadius > height) {
@@ -356,6 +357,7 @@ function spawnBlock(leftSide, topSide, blockWidth, blockHeight) {
     y: topSide,
     w: blockWidth,
     h: blockHeight,
+    color: color(random(0, 255), random(0, 255), random(0, 255)),
   };
 
   return theBlock;
@@ -365,7 +367,7 @@ function generateBlocks() {
   blocks = [];
 
   let numberOfColumns = 10;
-  let numberOfRows = 5;
+  let numberOfRows = 6;
   let blockWidth = width / numberOfColumns;
   let blockHeight = height / 25;
 
@@ -375,7 +377,7 @@ function generateBlocks() {
       let blockY = height / 10 + row * blockHeight;
 
       let theBlock = spawnBlock(
-        blockX, blockY, blockWidth, blockHeight
+        blockX, blockY, blockWidth, blockHeight, row
       );
 
       blocks.push(theBlock);
@@ -384,10 +386,30 @@ function generateBlocks() {
 }
 
 function displayBlocks() {
-  fill("lightblue");
-
+  
   for (let theBlock of blocks) {
+    fill(theBlock.color);
     rect(theBlock.x, theBlock.y, theBlock.w, theBlock.h);
   }
 }
 
+function checkBlockCollisions() {
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    let theBlock = blocks[i];
+
+    let hitBlock = collideRectCircle(
+      theBlock.x, theBlock.y, theBlock.w, theBlock.h,
+      ballX, ballY, ballRadius * 2
+    );
+
+    if (hitBlock) {
+      blocks.splice(i, 1);
+      ballSpeedY = -ballSpeedY;
+
+      score++;
+      updateHighScore();
+
+      break;
+    }
+  }
+}
