@@ -40,30 +40,38 @@ let homeX, homeY;
 
 let blocks = [];
 
+let tickSound;
+let winningSound;
+
 // Setup
 
-function setup() {
+async function setup() {
   createCanvas(windowWidth, windowHeight);
+  
+  
   textAlign(CENTER, CENTER);
-
+  
   sliderX = width / 2 - sliderWidth / 2;
   sliderY = height / 1.1 - sliderHeight / 2;
-
+  
   buttonX = width / 2 - buttonWidth / 2;
   easyY = height / 2 - 80;
   buttonY = height / 2;
   controlsY = height / 2 + 120;
-
+  
   homeX = width - homeWidth - 20;
   homeY = 20;
-
+  
   let savedScore = getItem("highScore");
-
+  
   if (savedScore !== null) {
     highScore = savedScore;
   }
-
+  
   resetBall();
+ 
+  tickSound = await loadSound("tick.wav");
+  winningSound = await loadSound("won.wav");
 }
 
 function draw() {
@@ -94,11 +102,19 @@ function draw() {
   else if (state === "info") {
     infoScreen();
   }
+  else if (state === "youWin") {
+    winningScreen();
+  }
+
 
   if (state !== "menu") {
     drawHomeButton();
   }
 }
+
+
+// Loading sounds
+
 
 // Screens
 
@@ -243,7 +259,7 @@ function bounceIfNeeded() {
 
     ballSpeedY += 0.5;
     ballSpeedY = -ballSpeedY;
-    sliderSpeed += 1.5;
+    sliderSpeed += 0.5;
 
     if (ballSpeedX === 0) {
       ballSpeedX = random([-3, 3]);
@@ -367,7 +383,7 @@ function generateBlocks() {
   blocks = [];
 
   let numberOfColumns = 10;
-  let numberOfRows = 6;
+  let numberOfRows = 5;
   let blockWidth = width / numberOfColumns;
   let blockHeight = height / 25;
 
@@ -405,11 +421,20 @@ function checkBlockCollisions() {
     if (hitBlock) {
       blocks.splice(i, 1);
       ballSpeedY = -ballSpeedY;
-
+      
       score++;
       updateHighScore();
-
+      
+      tickSound.play();
       break;
     }
+  }
+}
+
+function winningScreen() {
+  if (blocks.length === 0) {
+    state = "youWin";
+    text("You Win", width / 2, height / 2 + 90);
+    winningSound.play();
   }
 }
