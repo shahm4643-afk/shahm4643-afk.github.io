@@ -5,14 +5,14 @@
 // References:
 
 // Extra for Experts:
-
+// I used drawingContext to add a shadow around the ball and to improve the visiuals of my game
 
 let level = "easy";
 let state = "menu";
 let previousState = "menu";
 
 let sliderWidth = 120;
-let sliderHeight = 20;
+let sliderHeight = 25;
 let sliderX, sliderY;
 let sliderSpeed = 10;
 let draggingMouse = false;
@@ -54,14 +54,16 @@ async function setup() {
   sliderX = width / 2 - sliderWidth / 2;
   sliderY = height / 1.1 - sliderHeight / 2;
   
-  buttonX = width / 2 - buttonWidth / 2;
-  easyY = height / 2 - 80;
-  buttonY = height / 2;
+  buttonX =   width / 2 - buttonWidth / 2;
+  easyY =     height / 2 - 80;
+  buttonY =   height / 2;
   controlsY = height / 2 + 120;
   
   homeX = width - homeWidth - 20;
   homeY = 20;
-  
+
+  removeItem("highScore");
+  highScore = 0;
   let savedScore = getItem("highScore");
   
   if (savedScore !== null) {
@@ -105,19 +107,12 @@ function draw() {
   else if (state === "youWin") {
     winningScreen();
   }
-
-
   if (state !== "menu") {
     drawHomeButton();
   }
 }
 
-
-// Loading sounds
-
-
 // Screens
-
 function menuScreen() {
 
   fill("black");
@@ -138,8 +133,8 @@ function gameOverScreen() {
   text("Game Over", width / 2, height / 2 - 130);
 
   textSize(24);
-  text("Score: "           + score, width / 2, height / 2 - 60);
-  text("HighScore: "   + highScore, width / 2, height / 2 + 90);
+  text("Score: "+ score, width / 2, height / 2 - 60);
+  text("HighScore: "+ highScore, width / 2, height / 2 + 90);
 
   drawButton("Restart", buttonX, buttonY);
 }
@@ -150,9 +145,9 @@ function infoScreen() {
   text("Controls", width / 2, height / 2 - 200);
 
   textSize(24);
-  text("Move the slider: Left / Right arrows", width / 2, height / 2 - 120);
-  text("Or click the slider and drag it", width / 2, height / 2 - 80);
-  text("Press ESC to open or close this screen", width / 2, height / 2 + 20);
+  text("Move the slider: Left / Right arrows",   width / 2, height / 2 - 120);
+  text("Or click the slider and drag it",        width / 2, height / 2 - 80);
+
 }
 
 function displayScore() {
@@ -190,11 +185,11 @@ function drawHomeButton() {
 // Slider
 
 function playSlider() {
-  if (keyIsDown("d")) {
+  if (keyIsDown("d") || keyIsDown(RIGHT_ARROW)) {
     sliderX += sliderSpeed;
   }
 
-  if (keyIsDown("a")) {
+  if (keyIsDown("a") || keyIsDown(LEFT_ARROW)) {
     sliderX -= sliderSpeed;
   }
 
@@ -202,12 +197,17 @@ function playSlider() {
 }
 
 function displaySlider() {
-  fill(sliderColor);
-  rect(sliderX, sliderY, sliderWidth, sliderHeight);
+  stroke("white");
+  strokeWeight(2);
+  fill("black");
+
+  rect(sliderX, sliderY, sliderWidth, sliderHeight, 9);
+
+  strokeWeight(1);
+  stroke("black");
 }
 
 // Ball
-
 function moveBall() {
   previousBallY = ballY;
 
@@ -216,8 +216,14 @@ function moveBall() {
 }
 
 function displayBall() {
-  fill(sliderColor);
+  drawingContext.shadowBlur = 20;
+  drawingContext.shadowColor = "black";
+
+  fill("white");
+  
   circle(ballX, ballY, ballRadius * 2);
+
+  drawingContext.shadowBlur = 0;
 }
 
 function resetBall() {
@@ -252,7 +258,7 @@ function bounceIfNeeded() {
 
   let wasAboveSlider = previousBallY + ballRadius <= sliderY;
   let reachedSlider = ballY + ballRadius >= sliderY;
-  let isOverSlider = ballX >= sliderX && ballX <= sliderX + sliderWidth;
+  let isOverSlider = ballX + ballRadius >= sliderX && ballX - ballRadius <= sliderX + sliderWidth;
 
   if (ballSpeedY > 0 && wasAboveSlider && reachedSlider && isOverSlider) {
     ballY = sliderY - ballRadius;
@@ -286,7 +292,6 @@ function bounceIfNeeded() {
 }
 
 // Starting a game
-
 function startGame(chosenLevel) {
   level = chosenLevel;
 
@@ -299,6 +304,7 @@ function startGame(chosenLevel) {
 
   lives = 3;
   score = 0;
+  sliderSpeed = 10;
   sliderX = width / 2 - sliderWidth / 2;
   draggingMouse = false;
 
@@ -316,10 +322,8 @@ function updateHighScore() {
 }
 
 // Mouse controls
-
 function mousePressed() {
-  if (state !== "menu" &&
-      isMouseOver(homeX, homeY, homeWidth, homeHeight)) {
+  if (state !== "menu" && isMouseOver(homeX, homeY, homeWidth, homeHeight)) {
     state = "menu";
     draggingMouse = false;
     return;
@@ -342,7 +346,7 @@ function mousePressed() {
       draggingMouse = true;
     }
   }
-  else if (state === "gameOver") {
+  else if (state === "gameOver" || state === "youWin") {
     if (isMouseOver(buttonX, buttonY, buttonWidth, buttonHeight)) {
       startGame(level);
     }
@@ -365,15 +369,13 @@ function isMouseOver(leftSide, topSide, itemWidth, itemHeight) {
 }
 
 
-// blocks
-
+// Blocks
 function spawnBlock(leftSide, topSide, blockWidth, blockHeight) {
   let theBlock = {
     x: leftSide,
     y: topSide,
     w: blockWidth,
     h: blockHeight,
-    color: color(random(0, 255), random(0, 255), random(0, 255)),
   };
 
   return theBlock;
@@ -387,15 +389,18 @@ function generateBlocks() {
   let blockWidth = width / numberOfColumns;
   let blockHeight = height / 25;
 
+  let rowColors = ["red", "green", "yellow", "dodgerblue", "lightblue"];
+
   for (let row = 0; row < numberOfRows; row++) {
     for (let column = 0; column < numberOfColumns; column++) {
       let blockX = column * blockWidth;
       let blockY = height / 10 + row * blockHeight;
 
       let theBlock = spawnBlock(
-        blockX, blockY, blockWidth, blockHeight, row
+        blockX, blockY, blockWidth, blockHeight
       );
 
+      theBlock.color = rowColors[row];
       blocks.push(theBlock);
     }
   }
@@ -410,7 +415,7 @@ function displayBlocks() {
 }
 
 function checkBlockCollisions() {
-  for (let i = blocks.length - 1; i >= 0; i--) {
+  for (let i = blocks.length - 1; i >= 0; i--) {   // Checking the array backwards to make sure the index dosnt get messed up - Just like the class whiteboard demo
     let theBlock = blocks[i];
 
     let hitBlock = collideRectCircle(
@@ -426,15 +431,24 @@ function checkBlockCollisions() {
       updateHighScore();
       
       tickSound.play();
+
+      if (blocks.length === 0) {
+        state = "youWin";
+        draggingMouse = false;
+        winningSound.play();
+      }
       break;
     }
   }
 }
 
 function winningScreen() {
-  if (blocks.length === 0) {
-    state = "youWin";
-    text("You Win", width / 2, height / 2 + 90);
-    winningSound.play();
-  }
+  fill("black");
+  textSize(48);
+  text("You Win!", width / 2, height / 2 - 90);
+
+  textSize(24);
+  text("Score: " + score, width / 2, height / 2 - 40);
+
+  drawButton("Restart", buttonX, buttonY);
 }
