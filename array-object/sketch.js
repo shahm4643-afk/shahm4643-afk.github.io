@@ -263,19 +263,14 @@ function bounceIfNeeded() {
   if (ballSpeedY > 0 && wasAboveSlider && reachedSlider && isOverSlider) {
     ballY = sliderY - ballRadius;
 
-    ballSpeedY += 0.5;
-    ballSpeedY = -ballSpeedY;
-    sliderSpeed += 0.5;
+    let hitPosition = (ballX - sliderX) / sliderWidth;
+    hitPosition = constrain(hitPosition, 0, 1);
 
-    if (ballSpeedX === 0) {
-      ballSpeedX = random([-3, 3]);
-    }
-    else if (ballSpeedX > 0) {
-      ballSpeedX += 1;
-    }
-    else {
-      ballSpeedX -= 1;
-    }
+    let angle = (hitPosition - 0.5) * Math.PI / 2;
+    let speed = Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2);speed += 0.5;
+
+    ballSpeedX = speed * Math.sin(angle);
+    ballSpeedY = -speed * Math.cos(angle);
   }
 
   if (ballY - ballRadius > height) {
