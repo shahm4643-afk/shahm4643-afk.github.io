@@ -14,6 +14,7 @@
 - [Images and sound fx](11-loading-assets)
 - [rough practice](practice)
 
+- [grid demo](12-grid)
 ## Projects
 - [Interactive Scene](scene)
 - [Arrays and object notation](array-object)
