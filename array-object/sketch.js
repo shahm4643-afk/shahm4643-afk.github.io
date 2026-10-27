@@ -5,7 +5,7 @@
 // References:
 
 // Extra for Experts:
-// I used drawingContext to add a shadow around the ball and to improve the visiuals of my game
+// I used drawingContext to add a shadow around the ball and to improve the visiuals of my game, added trig on slider trajectory
 
 let level = "easy";
 let state = "menu";
