@@ -13,6 +13,7 @@
 - [randomized Art](10-art)
 - [Images and sound fx](11-loading-assets)
 - [rough practice](practice)
+- [2d rectangular grid](12-more-grids)
 
 - [grid demo](12-grid)
 ## Projects
