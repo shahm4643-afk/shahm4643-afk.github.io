@@ -1,11 +1,13 @@
 // Arrays and Object Notation Project
 // Muhammad Abidi
-// October, 2026
+// October 26, 2026
 
 // References:
 
 // Extra for Experts:
-// I used drawingContext to add a shadow around the ball and to improve the visiuals of my game, added trig on slider trajectory
+// I used drawingContext to add a shadow around the ball and to improve the visiuals
+// Added Trig on the slider. I used sin and cos for the horizontal and vertical speed
+// of the ball.
 
 let level = "easy";
 let state = "menu";
@@ -267,7 +269,8 @@ function bounceIfNeeded() {
     hitPosition = constrain(hitPosition, 0, 1);
 
     let angle = (hitPosition - 0.5) * Math.PI / 2;
-    let speed = Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2);speed += 0.5;
+    let speed = Math.sqrt(ballSpeedX ** 2 + ballSpeedY ** 2);
+    speed += 0.5;
 
     ballSpeedX = speed * Math.sin(angle);
     ballSpeedY = -speed * Math.cos(angle);
