@@ -16,6 +16,9 @@
 - [2d rectangular grid](12-more-grids)
 
 - [grid demo](12-grid)
+- [Game of Life](14-life)
+
+
 ## Projects
 - [Interactive Scene](scene)
 - [Arrays and object notation](array-object)
