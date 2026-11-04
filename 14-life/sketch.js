@@ -1,6 +1,6 @@
 // Conway's Game of Life
 
-const CELL_SIZE = 20;
+const CELL_SIZE = 0;
 const RENDER_ON_MULTIPLES_OF = 5;
 let rows;
 let cols;
