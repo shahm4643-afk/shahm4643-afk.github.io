@@ -1,7 +1,7 @@
 // Conway's Game of Life
 
 const CELL_SIZE = 10;
-const RENDER_ON_MULTIPLES_OF = 5;
+const RENDER_ON_MULTIPLES_OF = 1;
 let rows;
 let cols;
 let grid;
