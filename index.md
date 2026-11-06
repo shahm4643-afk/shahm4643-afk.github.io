@@ -17,6 +17,7 @@
 
 - [grid demo](12-grid)
 - [Game of Life](14-life)
+- [Character in Grid](15-character)
 
 
 ## Projects
