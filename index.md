@@ -14,7 +14,6 @@
 - [Images and sound fx](11-loading-assets)
 - [rough practice](practice)
 - [2d rectangular grid](12-more-grids)
-
 - [grid demo](12-grid)
 - [Game of Life](14-life)
 - [Character in Grid](15-character)
