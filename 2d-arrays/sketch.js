@@ -80,25 +80,6 @@ function draw() {
   }
 }
 
-function draw() {
-  background(220);
-
-  if (gameState === "home") {
-    menuScreen();
-  }
-  else {
-    handleMovement();
-    displayGrid();
-
-    if (gameState === "finished") {
-      fill("red");
-      textSize(60);
-      text("Finish", width / 2, height / 2);
-    }
-
-    drawHomeButton();
-  }
-}
 
 function menuScreen() {
   fill("black");
