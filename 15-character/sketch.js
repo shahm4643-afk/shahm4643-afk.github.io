@@ -1,6 +1,6 @@
 // character in grid
 
-const CELL_SIZE = 100;
+const CELL_SIZE = 10;
 const OPEN_TILE = 0;
 const IMPASSIBLE = 1;
 const PLAYER = 9;
@@ -21,8 +21,8 @@ async function setup() {
   grid = generateRandomGrid(cols, rows);
   //put player in grid
   grid[thePlayer.y][thePlayer.x] = PLAYER;
-  grassImg = await loadImage("clover.jpg");
-  stoneImg = await loadImage("stone.jpg");
+  // grassImg = await loadImage("clover.jpg");
+  // stoneImg = await loadImage("stone.jpg");
 }
 
 function draw() {
@@ -96,17 +96,17 @@ function displayGrid() {
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === OPEN_TILE) {
-        // fill('white');
-        image(stoneImg, x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        fill('white');
+        // image(stoneImg, x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       }
       else if (grid[y][x] === IMPASSIBLE) {
-        // fill('black');
-        image(grassImg, x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        fill('black');
+        // image(grassImg, x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       }
       else if (grid[y][x] === PLAYER) {
         fill("red");
-        square(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
       }
+      square(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE,);
     }
   }
 }

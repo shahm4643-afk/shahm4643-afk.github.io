@@ -18,7 +18,7 @@ const OPEN_TILE = 0;
 const IMPASSABLE = 1;
 const PLAYER = 9;
 
-const CELL_SIZE = 10;
+const CELL_SIZE = 20;
 let rows;
 let cols;
 let grid;
@@ -87,6 +87,7 @@ function menuScreen() {
   text("Select Your Circuit", width / 2, height / 2 - 100);
 
   drawButton("Demo Circuit", buttonX, buttonY);
+  drawButton("Circuit Template", buttonX ,buttonY+100);
 }
 
 function keyPressed() {
@@ -97,12 +98,11 @@ function keyPressed() {
   }
   else if (key === 'm') {
     startCircuit();
-}
-  else if (key === "ArrowRight" || key === "ArrowLeft" || 
-           key === "ArrowUp" || key === "ArrowDown") {
-  return false;
+  }
+  else if (key === "ArrowRight" || key === "ArrowLeft" || key === "ArrowUp" || key === "ArrowDown") {
+    return false;
   
-}
+  }
 
   else if (key === 'm') {
     gameState = "playing";
@@ -132,6 +132,10 @@ function mousePressed() {
   if (gameState === "home") {
     if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
       startCircuit();
+    }
+    
+    if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
+      generateEmptyGrid();
     }
   }
   else if (gameState === "playing") {
@@ -228,9 +232,9 @@ function paintCell() {
 }
 
 function handleMovement() {
-    if (gameState !== "playing") {
-        return;
-    }
+  if (gameState !== "playing") {
+    return;
+  }
   if (gameState === "finished") {
     return;
   }
@@ -293,3 +297,4 @@ function drawHomeButton() {
   textSize(20);
   text("Home", homeX + homeW / 2, homeY + homeH / 2);
 }
+
