@@ -12,17 +12,19 @@
 // (EXTRA FOR EXPERTS) if they touch the outline-they 
 // crash and particles all over the circuit,
 
-// Character in Grid
 
+// Constants
 const OPEN_TILE = 0;
 const IMPASSABLE = 1;
 const PLAYER = 9;
+const CELL_SIZE = 10;
 
-const CELL_SIZE = 20;
+// Variables
 let rows;
 let cols;
 let grid;
 let demoCircuit;
+
 let gameState = "home";
 
 let lastMoveTime = 0;
@@ -33,14 +35,26 @@ let the_player = {
   y: 0,
 };
 
+// Menu button
 let buttonW = 250;
 let buttonH = 60;
 let buttonX, buttonY;
 
+// Home button
 let homeW = 100;
 let homeH = 40;
 let homeX, homeY;
 
+// Finish lines
+let yasFinishLine = {
+  x: 115,
+  y: 60,
+};
+
+// car images
+let redbullImage;
+
+// Setup
 async function setup() {
   createCanvas(windowWidth, windowHeight);
 
@@ -51,14 +65,21 @@ async function setup() {
   grid[the_player.y][the_player.x] = PLAYER;
 
   demoCircuit = await loadJSON("raceTrackDemo.json");
+  yasMarina = await loadJSON("yas_marina.json");
+
+  redbullImage = await loadImage("redbull.png");
 
   textAlign(CENTER, CENTER);
 
   buttonX = width / 2 - buttonW / 2;
   buttonY = height / 2;
+
   homeX = width - homeW - 20;
   homeY = 20;
 }
+
+
+// Main draw function
 
 function draw() {
   background(220);
@@ -66,95 +87,192 @@ function draw() {
   if (gameState === "home") {
     menuScreen();
   }
-  else {
+  else if (gameState === "editing") {
+    displayGrid();
+    drawHomeButton();
+  }
+  else if (gameState === "playing") {
     handleMovement();
     displayGrid();
+    drawHomeButton();
+  }
+  else if (gameState === "finished") {
+    displayGrid();
 
-    if (gameState === "finished") {
-      fill("red");
-      textSize(60);
-      text("Finish", width / 2, height / 2);
-    }
+    fill("red");
+    textSize(60);
+    text("Finish", width / 2, height / 2);
 
     drawHomeButton();
   }
 }
 
 
+// Menu functions
+
 function menuScreen() {
   fill("black");
   textSize(48);
   text("Select Your Circuit", width / 2, height / 2 - 100);
 
-  drawButton("Demo Circuit", buttonX, buttonY);
-  drawButton("Circuit Template", buttonX ,buttonY+100);
+  drawButton("Yas Marina", buttonX , buttonY)
+  drawButton("Demo Circuit", buttonX, buttonY + 200);
+  drawButton("Circuit Template", buttonX, buttonY + 100);
 }
 
-function keyPressed() {
-  if (key === 'e') {
-    grid = generateEmptyGrid(cols, rows);
-    grid[the_player.y][the_player.x] = PLAYER;
-    gameState = "home";
-  }
-  else if (key === 'm') {
-    startCircuit();
-  }
-  else if (key === "ArrowRight" || key === "ArrowLeft" || key === "ArrowUp" || key === "ArrowDown") {
-    return false;
-  
+function drawButton(label, bx, by) {
+  fill("black");
+  rect(bx, by, buttonW, buttonH);
+
+  fill("white");
+  textSize(24);
+  text(label, bx + buttonW / 2, by + buttonH / 2);
+}
+
+function drawHomeButton() {
+  fill("black");
+  rect(homeX, homeY, homeW, homeH);
+
+  fill("white");
+  textSize(20);
+  text("Home", homeX + homeW / 2, homeY + homeH / 2);
+}
+
+function isMouseOver(bx, by, w, h) {
+  return mouseX >= bx &&
+    mouseX <= bx + w &&
+    mouseY >= by &&
+    mouseY <= by + h;
+}
+
+
+// Circuit functions
+
+function startCircuit(circuit, finishLine) {
+  grid = structuredClone(circuit);
+  shiftCircuit(-7, 10);
+
+  rows = grid.length;
+  cols = grid[0].length;
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (grid[y][x] === PLAYER) {
+        the_player.x = x;
+        the_player.y = y;
+      }
+    }
   }
 
-  else if (key === 'm') {
-    gameState = "playing";
-    grid = structuredClone(demoCircuit);
+  // New starting position accorinding to circuit chosen
+  if (finishLine) {
+    the_player.x = finishLine.x;
+    the_player.y = finishLine.y;
+  }
 
-    rows = grid.length;
-    cols = grid[0].length;
+  grid[the_player.y][the_player.x] = PLAYER;
 
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        if (grid[y][x] === PLAYER) {
-          the_player.x = x;
-          the_player.y = y;
-        }
+  gameState = "playing";
+}
+
+function startTemplate() {
+  grid = generateEmptyGrid(cols, rows);
+
+  the_player.x = 0;
+  the_player.y = 0;
+
+  grid[the_player.y][the_player.x] = PLAYER;
+
+  gameState = "editing";
+}
+
+
+// Grid functions
+function generateEmptyGrid(cols, rows) {
+  let newGrid = [];
+
+  for (let y = 0; y < rows; y++) {
+    newGrid.push([]);
+
+    for (let x = 0; x < cols; x++) {
+      newGrid[y].push(OPEN_TILE);
+    }
+  }
+
+  return newGrid;
+}
+
+function displayGrid() {
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+
+      if (grid[y][x] === PLAYER) {
+        continue;
+      }
+      else if (grid[y][x] === OPEN_TILE) {
+        fill("white");
+      }
+      else if (grid[y][x] === IMPASSABLE) {
+        fill("black");
+      }
+
+      square(
+        x * CELL_SIZE,
+        y * CELL_SIZE,
+        CELL_SIZE
+      );
+    }
+  }
+
+  // Draw the car AFTER the entire grid
+  image(redbullImage, the_player.x * CELL_SIZE - 10, the_player.y * CELL_SIZE - 10, CELL_SIZE * 5, CELL_SIZE * 5
+  );
+}
+
+function toggleCell(x, y) {
+  if (x >= 0 && x < cols && y >= 0 && y < rows) {
+
+    if (grid[y][x] === OPEN_TILE) {
+      grid[y][x] = IMPASSABLE;
+    }
+    else if (grid[y][x] === IMPASSABLE) {
+      grid[y][x] = OPEN_TILE;
+    }
+  }
+}
+
+function paintCell() {
+  let x = Math.floor(mouseX / CELL_SIZE);
+  let y = Math.floor(mouseY / CELL_SIZE);
+
+  if (x >= 0 && x < cols && y >= 0 && y < rows) {
+
+    if (grid[y][x] !== PLAYER) {
+
+      if (keyIsDown(SHIFT)) {
+        grid[y][x] = OPEN_TILE;
+      }
+      else {
+        grid[y][x] = IMPASSABLE;
       }
     }
   }
 }
 
-function mousePressed() {
-  if (gameState !== "home" &&
-      isMouseOver(homeX, homeY, homeW, homeH)) {
-    gameState = "home";
-    return;
-  }
 
-  if (gameState === "home") {
-    if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
-      startCircuit();
-    }
-    
-    if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
-      generateEmptyGrid();
-    }
-  }
-  else if (gameState === "playing") {
-    let x = Math.floor(mouseX / CELL_SIZE);
-    let y = Math.floor(mouseY / CELL_SIZE);
-
-    toggleCell(x, y);
-  }
-}
+// Player movement functions
 function movePlayer(x, y) {
-  if (gameState === "finished") {
+  if (gameState !== "playing") {
     return;
   }
 
   if (x >= 0 && x < cols && y >= 0 && y < rows) {
+
     if (grid[y][x] === IMPASSABLE) {
       gameState = "finished";
     }
     else if (grid[y][x] === OPEN_TILE) {
+
       let oldX = the_player.x;
       let oldY = the_player.y;
 
@@ -167,79 +285,13 @@ function movePlayer(x, y) {
   }
 }
 
-function toggleCell(x, y) {
-  //make sure you're in the grid
-  if (x >= OPEN_TILE && x < cols && y >= OPEN_TILE && y < rows) {
-    if (grid[y][x] === OPEN_TILE) {
-      grid[y][x] = IMPASSABLE;
-    }
-    else if (grid[y][x] === IMPASSABLE) {
-      grid[y][x] = OPEN_TILE;
-    }
-  }
-}
-
-function displayGrid() {
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      if (grid[y][x] === OPEN_TILE) {
-        fill('white');
-      }
-      else if (grid[y][x] === IMPASSABLE) {
-        fill('black');
-      }
-      else if (grid[y][x] === PLAYER) {
-        fill('red');
-      }
-      square(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
-    }
-    
-  }
-}
-
-
-function generateEmptyGrid(cols, rows) {
-  let newGrid = [];
-  for (let y = 0; y < rows; y++) {
-    newGrid.push([]);
-    for (let x = 0; x < cols; x++) {
-      newGrid[y].push(OPEN_TILE);
-    }
-  }
-  return newGrid;
-}
-
-function mouseDragged() {
-  if (gameState === "playing") {
-    paintCell();
-  }
-}
-
-function paintCell() {
-  let x = Math.floor(mouseX / CELL_SIZE);
-  let y = Math.floor(mouseY / CELL_SIZE);
-
-  if (x >= 0 && x < cols && y >= 0 && y < rows) {
-    if (grid[y][x] !== PLAYER) {
-      if (keyIsDown(SHIFT)) {
-        grid[y][x] = OPEN_TILE;
-      }
-      else {
-        grid[y][x] = IMPASSABLE;
-      }
-    }
-  }
-}
-
 function handleMovement() {
   if (gameState !== "playing") {
     return;
   }
-  if (gameState === "finished") {
-    return;
-  }
 
   if (millis() - lastMoveTime >= moveDelay) {
+
     if (keyIsDown("ArrowRight")) {
       movePlayer(the_player.x + 1, the_player.y);
       lastMoveTime = millis();
@@ -259,42 +311,97 @@ function handleMovement() {
   }
 }
 
-function drawButton(label, bx, by) {
-  fill("black");
-  rect(bx, by, buttonW, buttonH);
 
-  fill("white");
-  textSize(24);
-  text(label, bx + buttonW / 2, by + buttonH / 2);
+// Mouse controls
+function mousePressed() {
+
+  // Home button
+
+  if (gameState !== "home" &&
+      isMouseOver(homeX, homeY, homeW, homeH)) {
+
+    gameState = "home";
+    return;
+  }
+
+  // Main menu buttons
+
+  if (gameState === "home") {
+
+    if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
+      startCircuit(yasMarina, yasFinishLine);
+    }
+    else if (isMouseOver(buttonX, buttonY + 100, buttonW, buttonH)) {
+      startTemplate();
+    }
+    else if (isMouseOver(buttonX, buttonY + 200, buttonW, buttonH)) {
+      startCircuit(demoCircuit);
+    }
+  }
+
+  // Circuit editing
+
+  else if (gameState === "editing") {
+    let x = Math.floor(mouseX / CELL_SIZE);
+    let y = Math.floor(mouseY / CELL_SIZE);
+
+    toggleCell(x, y);
+  }
 }
 
-function isMouseOver(bx, by, w, h) {
-  return mouseX >= bx && mouseX <= bx + w && mouseY >= by && mouseY <= by + h;
+function mouseDragged() {
+  if (gameState === "editing") {
+    paintCell();
+  }
 }
 
-function startCircuit() {
-  grid = structuredClone(demoCircuit);
 
-  rows = grid.length;
-  cols = grid[0].length;
+// Keyboard controls
+function keyPressed() {
 
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      if (grid[y][x] === PLAYER) {
-        the_player.x = x;
-        the_player.y = y;
+  // Return to home
+
+  if (key === "e") {
+    gameState = "home";
+  }
+
+  // Prevent arrow keys from scrolling the page
+
+  else if (
+    key === "ArrowRight" ||
+    key === "ArrowLeft" ||
+    key === "ArrowUp" ||
+    key === "ArrowDown"
+  ) {
+    return false;
+  }
+}
+
+
+// I made this function for myself so i dont have to make a circuit all 
+// over again just because its not positioned correctly.
+
+function shiftCircuit(horizontal, vertical) {
+
+  let newGrid = generateEmptyGrid(cols, rows);
+
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+
+      let newX = x + horizontal;
+      let newY = y + vertical;
+
+      if (
+        newX >= 0 && newX < cols &&
+        newY >= 0 && newY < rows
+      ) {
+        newGrid[newY][newX] = grid[y][x];
       }
     }
   }
-  gameState = "playing";
+
+  grid = newGrid;
+
+  the_player.x += horizontal;
+  the_player.y += vertical;
 }
-
-function drawHomeButton() {
-  fill("black");
-  rect(homeX, homeY, homeW, homeH);
-
-  fill("white");
-  textSize(20);
-  text("Home", homeX + homeW / 2, homeY + homeH / 2);
-}
-
