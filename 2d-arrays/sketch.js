@@ -47,7 +47,7 @@ let homeX, homeY;
 
 // Finish lines
 let yasFinishLine = {
-  x: 115,
+  x: 95,
   y: 60,
 };
 
@@ -115,7 +115,7 @@ function menuScreen() {
   textSize(48);
   text("Select Your Circuit", width / 2, height / 2 - 100);
 
-  drawButton("Yas Marina", buttonX , buttonY)
+  drawButton("Yas Marina", buttonX , buttonY);
   drawButton("Demo Circuit", buttonX, buttonY + 200);
   drawButton("Circuit Template", buttonX, buttonY + 100);
 }
@@ -147,10 +147,9 @@ function isMouseOver(bx, by, w, h) {
 
 
 // Circuit functions
-
 function startCircuit(circuit, finishLine) {
   grid = structuredClone(circuit);
-  shiftCircuit(-7, 10);
+  shiftCircuit(-27, 10);
 
   rows = grid.length;
   cols = grid[0].length;
@@ -225,8 +224,8 @@ function displayGrid() {
   }
 
   // Draw the car AFTER the entire grid
-  image(redbullImage, the_player.x * CELL_SIZE - 10, the_player.y * CELL_SIZE - 10, CELL_SIZE * 5, CELL_SIZE * 5
-  );
+  translate(the_player.x*CELL_SIZE - 10, the_player.y*CELL_SIZE - 10);
+  image(redbullImage, 0, 0, CELL_SIZE*5, CELL_SIZE*5);
 }
 
 function toggleCell(x, y) {
@@ -316,7 +315,6 @@ function handleMovement() {
 function mousePressed() {
 
   // Home button
-
   if (gameState !== "home" &&
       isMouseOver(homeX, homeY, homeW, homeH)) {
 
@@ -325,7 +323,6 @@ function mousePressed() {
   }
 
   // Main menu buttons
-
   if (gameState === "home") {
 
     if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
@@ -340,7 +337,6 @@ function mousePressed() {
   }
 
   // Circuit editing
-
   else if (gameState === "editing") {
     let x = Math.floor(mouseX / CELL_SIZE);
     let y = Math.floor(mouseY / CELL_SIZE);
@@ -360,13 +356,11 @@ function mouseDragged() {
 function keyPressed() {
 
   // Return to home
-
   if (key === "e") {
     gameState = "home";
   }
 
   // Prevent arrow keys from scrolling the page
-
   else if (
     key === "ArrowRight" ||
     key === "ArrowLeft" ||
@@ -380,7 +374,6 @@ function keyPressed() {
 
 // I made this function for myself so i dont have to make a circuit all 
 // over again just because its not positioned correctly.
-
 function shiftCircuit(horizontal, vertical) {
 
   let newGrid = generateEmptyGrid(cols, rows);
