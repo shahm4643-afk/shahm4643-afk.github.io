@@ -19,6 +19,7 @@
 - [Character in Grid](15-character)
 - [Set timeout](16-timeout)
 - [Set time Interval](17-interval)
+- [Grid in Center](18-centerCanvas)
 
 ## Projects
 - [Interactive Scene](scene)
