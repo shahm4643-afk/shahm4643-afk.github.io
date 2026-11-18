@@ -16,6 +16,7 @@
 // Constants
 const OPEN_TILE = 0;
 const IMPASSABLE = 1;
+const FINISH_LINE = 2;
 const PLAYER = 9;
 const CELL_SIZE = 10;
 
@@ -149,7 +150,7 @@ function isMouseOver(bx, by, w, h) {
 // Circuit functions
 function startCircuit(circuit, finishLine) {
   grid = structuredClone(circuit);
-  shiftCircuit(-27, 10);
+  shiftCircuit(-37, 10);
 
   rows = grid.length;
   cols = grid[0].length;
@@ -214,6 +215,9 @@ function displayGrid() {
       else if (grid[y][x] === IMPASSABLE) {
         fill("black");
       }
+      else if (grid[y][x] === FINISH_LINE) {
+        fill("yellow");
+      }
 
       square(
         x * CELL_SIZE,
@@ -237,6 +241,9 @@ function toggleCell(x, y) {
     else if (grid[y][x] === IMPASSABLE) {
       grid[y][x] = OPEN_TILE;
     }
+    else if (grid[y][x] === OPEN_TILE || IMPASSABLE) {
+      grid[y][x] = FINISH_LINE;
+    }
   }
 }
 
@@ -245,18 +252,22 @@ function paintCell() {
   let y = Math.floor(mouseY / CELL_SIZE);
 
   if (x >= 0 && x < cols && y >= 0 && y < rows) {
-
     if (grid[y][x] !== PLAYER) {
 
       if (keyIsDown(SHIFT)) {
         grid[y][x] = OPEN_TILE;
       }
+      else if (keyIsDown(70)) { 
+        grid[y][x] = FINISH_LINE;
+      }
       else {
         grid[y][x] = IMPASSABLE;
       }
+
     }
   }
 }
+
 
 
 // Player movement functions
@@ -280,6 +291,9 @@ function movePlayer(x, y) {
 
       grid[y][x] = PLAYER;
       grid[oldY][oldX] = OPEN_TILE;
+    }
+    else if (grid[y][x] === FINISH_LINE) {
+      gameState = "racing";
     }
   }
 }
