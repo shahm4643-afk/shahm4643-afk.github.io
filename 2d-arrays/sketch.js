@@ -1,4 +1,5 @@
-// 2D Arrays
+
+ // 2D Arrays
 // Muhammad Abidi
 // Date
 //
@@ -25,11 +26,14 @@ let rows;
 let cols;
 let grid;
 let demoCircuit;
+let yasMarina;
 
 let gameState = "home";
 
 let lastMoveTime = 0;
 let moveDelay = 100;
+
+let finishPaintMode = false;
 
 let the_player = {
   x: 0,
@@ -150,10 +154,11 @@ function isMouseOver(bx, by, w, h) {
 // Circuit functions
 function startCircuit(circuit, finishLine) {
   grid = structuredClone(circuit);
-  shiftCircuit(-37, 10);
 
   rows = grid.length;
   cols = grid[0].length;
+
+  shiftCircuit(-37, 10);
 
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
@@ -164,7 +169,7 @@ function startCircuit(circuit, finishLine) {
     }
   }
 
-  // New starting position accorinding to circuit chosen
+  // New starting position according to circuit chosen
   if (finishLine) {
     the_player.x = finishLine.x;
     the_player.y = finishLine.y;
@@ -216,7 +221,7 @@ function displayGrid() {
         fill("black");
       }
       else if (grid[y][x] === FINISH_LINE) {
-        fill("yellow");
+        fill("grey");
       }
 
       square(
@@ -228,23 +233,10 @@ function displayGrid() {
   }
 
   // Draw the car AFTER the entire grid
-  translate(the_player.x*CELL_SIZE - 10, the_player.y*CELL_SIZE - 10);
-  image(redbullImage, 0, 0, CELL_SIZE*5, CELL_SIZE*5);
-}
-
-function toggleCell(x, y) {
-  if (x >= 0 && x < cols && y >= 0 && y < rows) {
-
-    if (grid[y][x] === OPEN_TILE) {
-      grid[y][x] = IMPASSABLE;
-    }
-    else if (grid[y][x] === IMPASSABLE) {
-      grid[y][x] = OPEN_TILE;
-    }
-    else if (grid[y][x] === OPEN_TILE || IMPASSABLE) {
-      grid[y][x] = FINISH_LINE;
-    }
-  }
+  push();
+  translate(the_player.x * CELL_SIZE - 10, the_player.y * CELL_SIZE - 10);
+  image(redbullImage, 0, 0, CELL_SIZE * 5, CELL_SIZE * 5);
+  pop();
 }
 
 function paintCell() {
@@ -252,22 +244,22 @@ function paintCell() {
   let y = Math.floor(mouseY / CELL_SIZE);
 
   if (x >= 0 && x < cols && y >= 0 && y < rows) {
-    if (grid[y][x] !== PLAYER) {
 
-      if (keyIsDown(SHIFT)) {
-        grid[y][x] = OPEN_TILE;
-      }
-      else if (keyIsDown(70)) { 
-        grid[y][x] = FINISH_LINE;
-      }
-      else {
-        grid[y][x] = IMPASSABLE;
-      }
+    if (grid[y][x] === PLAYER) {
+      return;
+    }
 
+    if (keyIsDown(SHIFT)) {
+      grid[y][x] = OPEN_TILE;
+    }
+    else if (finishPaintMode) {
+      grid[y][x] = FINISH_LINE;
+    }
+    else {
+      grid[y][x] = IMPASSABLE;
     }
   }
 }
-
 
 
 // Player movement functions
@@ -293,7 +285,7 @@ function movePlayer(x, y) {
       grid[oldY][oldX] = OPEN_TILE;
     }
     else if (grid[y][x] === FINISH_LINE) {
-      gameState = "racing";
+      gameState = "finished";
     }
   }
 }
@@ -352,10 +344,7 @@ function mousePressed() {
 
   // Circuit editing
   else if (gameState === "editing") {
-    let x = Math.floor(mouseX / CELL_SIZE);
-    let y = Math.floor(mouseY / CELL_SIZE);
-
-    toggleCell(x, y);
+    paintCell();
   }
 }
 
@@ -369,19 +358,30 @@ function mouseDragged() {
 // Keyboard controls
 function keyPressed() {
 
+  // Finish line painting mode
+  if (key === "f" || key === "F") {
+    finishPaintMode = true;
+  }
+
   // Return to home
-  if (key === "e") {
+  if (key === "e" || key === "E") {
     gameState = "home";
   }
 
   // Prevent arrow keys from scrolling the page
-  else if (
+  if (
     key === "ArrowRight" ||
     key === "ArrowLeft" ||
     key === "ArrowUp" ||
     key === "ArrowDown"
   ) {
     return false;
+  }
+}
+
+function keyReleased() {
+  if (key === "f" || key === "F") {
+    finishPaintMode = false;
   }
 }
 
