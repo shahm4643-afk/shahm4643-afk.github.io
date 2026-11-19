@@ -1,5 +1,5 @@
 
- // 2D Arrays
+// 2D Arrays
 // Muhammad Abidi
 // Date
 //
