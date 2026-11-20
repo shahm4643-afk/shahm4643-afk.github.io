@@ -21,7 +21,7 @@ const FINISH_LINE = 2;
 const PLAYER = 9;
 const CELL_SIZE = 10;
 
-// Variables
+// Variable
 let rows;
 let cols;
 let grid;
@@ -59,6 +59,17 @@ let yasFinishLine = {
 // car images
 let redbullImage;
 
+// Moving the car
+let carX;
+let carY;
+let carAngle = 0;
+let carSpeed = 0;
+
+let acceleration = 0.15;
+let maxSpeed = 3;
+let friction = 0.98;
+let turnSpeed = 0.04;
+
 // Setup
 async function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -70,7 +81,7 @@ async function setup() {
   grid[the_player.y][the_player.x] = PLAYER;
 
   demoCircuit = await loadJSON("raceTrackDemo.json");
-  yasMarina = await loadJSON("yas_marina.json");
+  yasMarina = await loadJSON("yas_marina_AD.json");
 
   redbullImage = await loadImage("redbull.png");
 
@@ -87,7 +98,7 @@ async function setup() {
 // Main draw function
 
 function draw() {
-  background(220);
+  background("creame");
 
   if (gameState === "home") {
     menuScreen();
@@ -174,6 +185,11 @@ function startCircuit(circuit, finishLine) {
     the_player.x = finishLine.x;
     the_player.y = finishLine.y;
   }
+    carX = the_player.x * CELL_SIZE;
+    carY = the_player.y * CELL_SIZE;
+
+    carAngle = 0;
+    carSpeed = 0;
 
   grid[the_player.y][the_player.x] = PLAYER;
 
@@ -234,8 +250,15 @@ function displayGrid() {
 
   // Draw the car AFTER the entire grid
   push();
-  translate(the_player.x * CELL_SIZE - 10, the_player.y * CELL_SIZE - 10);
+
+  translate(carX + CELL_SIZE/2, carY + CELL_SIZE/2);
+  rotate(carAngle);
+
+  imageMode(CENTER);
   image(redbullImage, 0, 0, CELL_SIZE * 5, CELL_SIZE * 5);
+
+  imageMode(CORNER);
+
   pop();
 }
 
@@ -291,29 +314,33 @@ function movePlayer(x, y) {
 }
 
 function handleMovement() {
-  if (gameState !== "playing") {
-    return;
+
+  if (keyIsDown(UP_ARROW)) {
+    carSpeed += acceleration;
+  }
+  else if (keyIsDown(DOWN_ARROW)) {
+    carSpeed -= acceleration;
   }
 
-  if (millis() - lastMoveTime >= moveDelay) {
+  carSpeed *= friction;
 
-    if (keyIsDown("ArrowRight")) {
-      movePlayer(the_player.x + 1, the_player.y);
-      lastMoveTime = millis();
-    }
-    else if (keyIsDown("ArrowLeft")) {
-      movePlayer(the_player.x - 1, the_player.y);
-      lastMoveTime = millis();
-    }
-    else if (keyIsDown("ArrowUp")) {
-      movePlayer(the_player.x, the_player.y - 1);
-      lastMoveTime = millis();
-    }
-    else if (keyIsDown("ArrowDown")) {
-      movePlayer(the_player.x, the_player.y + 1);
-      lastMoveTime = millis();
-    }
+  if (carSpeed > maxSpeed) {
+    carSpeed = maxSpeed;
   }
+  if (carSpeed < -maxSpeed/2) {
+    carSpeed = -maxSpeed/2;
+  }
+
+  if (keyIsDown(LEFT_ARROW)) {
+    carAngle -= turnSpeed;
+  }
+  if (keyIsDown(RIGHT_ARROW)) {
+    carAngle += turnSpeed;
+  }
+
+  carX += cos(carAngle) * carSpeed;
+  carY += sin(carAngle) * carSpeed;
+  checkCollision();
 }
 
 
@@ -335,7 +362,7 @@ function mousePressed() {
       startCircuit(yasMarina, yasFinishLine);
     }
     else if (isMouseOver(buttonX, buttonY + 100, buttonW, buttonH)) {
-      startTemplate();
+      editCircuit(yasMarina);
     }
     else if (isMouseOver(buttonX, buttonY + 200, buttonW, buttonH)) {
       startCircuit(demoCircuit);
@@ -411,4 +438,36 @@ function shiftCircuit(horizontal, vertical) {
 
   the_player.x += horizontal;
   the_player.y += vertical;
+}
+
+
+function editCircuit(circuit) {
+  grid = structuredClone(circuit);
+
+  rows = grid.length;
+  cols = grid[0].length;
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      if (grid[y][x] === PLAYER) {
+        the_player.x = x;
+        the_player.y = y;
+      }
+    }
+  }
+
+  gameState = "editing";
+}
+
+function checkCollision() {
+
+  let gridX = Math.floor(carX / CELL_SIZE);
+  let gridY = Math.floor(carY / CELL_SIZE);
+
+  if (gridY < 0 || gridY >= rows || gridX < 0 || gridX >= cols) {
+    gameState = "finished";
+  }
+  else if (grid[gridY][gridX] === IMPASSABLE) {
+    gameState = "finished";
+  }
 }
