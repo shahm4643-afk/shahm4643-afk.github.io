@@ -13,7 +13,7 @@ async function setup() {
   createCanvas(windowWidth, windowHeight);
 
   coinImg = await loadImage("coin.png");
-  coinSound = await loadSound("coin.wav");
+  coinSound = await loadSound("accelerating.mp3");
 }
 
 function draw() {
