@@ -25,10 +25,14 @@ const DARK_FINISH = 3;
 let rows, cols, grid, demoCircuit, yasMarina;
 let gameState = "home";
 let finishPaintMode = false;
-let the_player = { x: 0, y: 0 };
+let the_player = { 
+  x: 0,
+  y: 0 
+};
 
 let currentCircuit;
 let currentFinishLine;
+let winner = "";
 
 // Menu buttons
 let buttonW = 250;
@@ -46,27 +50,50 @@ let restartH = 40;
 let restartX, restartY;
 
 // Finish lines
-let yasFinishLine = { 
-  x: 125,
-  y: 50, 
-  };
+let rbFinishLine = { 
+  x: 124, 
+  y: 50,
+};
+
+let sfFinishLine = { 
+  x: 124, 
+  y: 53, 
+};
 
 // Car
 let redbullImage;
-let carX, carY;
-let carAngle = 0;
-let carSpeed = 0;
+let rbCarSpeed = 0;
+let rbAcceleration = 0.18;
+let rbMaxSpeed = 9.5;
+let rbFriction = 0.98;
+let rbTurnSpeed = 0.065;
+let rbCarAngle = 0;
+let rbCarX;
+let rbCarY;
 
-let acceleration = 0.15;
-let maxSpeed = 10;
-let friction = 0.98;
-let turnSpeed = 0.05;
+let ferrariImage;
+let sfCarSpeed = 0;
+let sfAcceleration = 0.18;
+let sfFriction = 0.98;
+let sfMaxSpeed = 9.5;
+let sfTurnSpeed = 0.065;
+let sfCarAngle = 0;
+let sfCarX;
+let sfCarY;
 
+let rbState = "racing"; // "racing", "crashed", or "won"
+let sfState = "racing";
 // Zoom and positioning
 let circuitScale = 1;
 let circuitOffsetX = 0;
 let circuitOffsetY = 0;
 
+let rbStartTime = 0;
+let sfStartTime = 0;
+let rbStarted = false;
+let sfStarted = false;
+let rbTime = 0;
+let sfTime = 0;
 
 // Setup
 async function setup() {
@@ -81,6 +108,7 @@ async function setup() {
   yasMarina = await loadJSON("yas_marina.json");
 
   redbullImage = await loadImage("redbull.png");
+  ferrariImage = await loadImage("ferrari.png");
 
   textAlign(CENTER, CENTER);
 
@@ -92,6 +120,7 @@ async function setup() {
 
   restartX = 20;
   restartY = 20;
+  menuScreen();
 }
 
 
@@ -99,18 +128,29 @@ async function setup() {
 function draw() {
   background("lightblue");
 
-  if (gameState === "home") {
-    menuScreen();
-  }
-
-  else if (gameState === "editing") {
+  if (gameState === "editing") {
     displayGrid();
     drawHomeButton();
+  }
+
+  else if (gameState === "home") {
+    menuScreen();
   }
 
   else if (gameState === "playing") {
     handleMovement();
     displayGrid();
+
+    fill("red");
+    textSize(30);
+    if (rbState === "crashed") {
+      text("Red Bull crashed", width / 2, 40);
+    }
+    if (sfState === "crashed") {
+      text("Ferrari crashed", width / 2, 80);
+    }
+
+    drawTimes();
     drawHomeButton();
     drawRestartButton();
   }
@@ -120,8 +160,9 @@ function draw() {
 
     fill("red");
     textSize(50);
-    text("CRASHED", width / 2, 100);
+    text("BOTH CRASHED", width / 2, 100);
 
+    drawTimes();
     drawHomeButton();
     drawRestartButton();
   }
@@ -131,94 +172,36 @@ function draw() {
 
     fill("green");
     textSize(50);
-    text("FINISHED!", width / 2, 100);
+    text(winner + " wins!", width / 2, 100);
 
+    drawTimes();
     drawHomeButton();
     drawRestartButton();
   }
 }
 
 
-// Menu
-function menuScreen() {
-  fill("black");
-  textSize(48);
-  text("Select Your Circuit", width / 2, height / 2 - 100);
-
-  drawButton("Yas Marina", buttonX, buttonY);
-  drawButton("Circuit Template", buttonX, buttonY + 100);
-  drawButton("Demo Circuit", buttonX, buttonY + 200);
-}
-
-
-function drawButton(label, bx, by) {
-  fill("black");
-  rect(bx, by, buttonW, buttonH);
-
-  fill("white");
-  textSize(24);
-  text(label, bx + buttonW / 2, by + buttonH / 2);
-}
-
-
-function drawHomeButton() {
-  fill("black");
-  rect(homeX, homeY, homeW, homeH);
-
-  fill("white");
-  textSize(20);
-  text("Home", homeX + homeW / 2, homeY + homeH / 2);
-}
-
-
-function drawRestartButton() {
-  fill("black");
-  rect(restartX, restartY, restartW, restartH);
-
-  fill("white");
-  textSize(20);
-  text("Restart", restartX + restartW / 2, restartY + restartH / 2);
-}
-
-
-function isMouseOver(bx, by, w, h) {
-  return mouseX >= bx &&
-    mouseX <= bx + w &&
-    mouseY >= by &&
-    mouseY <= by + h;
-}
-
-
 // Start circuit
-function startCircuit(circuit, finishLine) {
+function startCircuit(circuit, rbLine, sfLine) {
   currentCircuit = circuit;
-  currentFinishLine = finishLine;
+  currentFinishLine = rbLine;
 
   grid = structuredClone(circuit);
 
   rows = grid.length;
   cols = grid[0].length;
 
-  // Find the starting position
-  let playerFound = false;
-
+  // Find the player tile
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === PLAYER) {
         the_player.x = x;
         the_player.y = y;
-        playerFound = true;
       }
     }
   }
 
-  // Use the finish line as the starting position
-  if (finishLine) {
-    the_player.x = finishLine.x;
-    the_player.y = finishLine.y;
-  }
-
-  // Remove PLAYER from the grid
+  // Remove player tile from the grid
   for (let y = 0; y < rows; y++) {
     for (let x = 0; x < cols; x++) {
       if (grid[y][x] === PLAYER) {
@@ -227,12 +210,26 @@ function startCircuit(circuit, finishLine) {
     }
   }
 
-  // Put the car at the starting position
-  carX = the_player.x * CELL_SIZE;
-  carY = the_player.y * CELL_SIZE;
+  // Red Bull starting position
+  rbCarX = rbLine.x * CELL_SIZE;
+  rbCarY = rbLine.y * CELL_SIZE;
+  rbCarAngle = 0;
+  rbCarSpeed = 0;
 
-  carAngle = 0;
-  carSpeed = 0;
+  // Ferrari starting position
+  sfCarX = sfLine.x * CELL_SIZE;
+  sfCarY = sfLine.y * CELL_SIZE;
+  sfCarAngle = 0;
+  sfCarSpeed = 0;
+
+  winner = "";
+  rbState = "racing";
+  sfState = "racing";
+
+  rbStarted = false;
+  sfStarted = false;
+  rbTime = 0;
+  sfTime = 0;
 
   circuitScale = 1.3;
 
@@ -240,45 +237,6 @@ function startCircuit(circuit, finishLine) {
   gameState = "playing";
 }
 
-
-// Restart race
-function restartCircuit() {
-  if (currentCircuit) {
-    startCircuit(currentCircuit, currentFinishLine);
-  }
-}
-
-
-// Circuit template
-function startTemplate() {
-  grid = generateEmptyGrid(cols, rows);
-
-  the_player.x = 0;
-  the_player.y = 0;
-
-  grid[0][0] = PLAYER;
-
-  circuitScale = 1;
-
-  centerCircuit();
-  gameState = "editing";
-}
-
-
-// Generate empty grid
-function generateEmptyGrid(gridCols, gridRows) {
-  let newGrid = [];
-
-  for (let y = 0; y < gridRows; y++) {
-    newGrid.push([]);
-
-    for (let x = 0; x < gridCols; x++) {
-      newGrid[y].push(OPEN_TILE);
-    }
-  }
-
-  return newGrid;
-}
 
 
 function displayGrid() {
@@ -312,30 +270,33 @@ function displayGrid() {
   pop();
 
 
-  // Draw car
-  if (gameState === "playing" ||
-      gameState === "finished" ||
-      gameState === "won") {
-
+  // Draw both cars separately so each uses its own image and angle.
+  if (gameState === "playing" || gameState === "finished" || gameState === "won") {
     push();
-
-    // Apply the same positioning and zoom as the circuit
     translate(circuitOffsetX, circuitOffsetY);
     scale(circuitScale);
 
-    translate(carX + CELL_SIZE / 2, carY + CELL_SIZE / 2);
-    rotate(carAngle);
-
-    // Draw the car
+    push();
+    translate(rbCarX + CELL_SIZE / 2, rbCarY + CELL_SIZE / 2);
+    rotate(rbCarAngle);
     if (redbullImage) {
       imageMode(CENTER);
       image(redbullImage, 0, 0, CELL_SIZE * 4, CELL_SIZE * 4);
     }
+    pop();
 
-    rectMode(CORNER);
-    imageMode(CORNER);
+    push();
+    translate(sfCarX + CELL_SIZE / 2, sfCarY + CELL_SIZE / 2);
+    rotate(sfCarAngle);
+    if (ferrariImage) {
+      imageMode(CENTER);
+      image(ferrariImage, 0, 0, CELL_SIZE * 4.3, CELL_SIZE * 2.3);
+    }
+    pop();
 
     pop();
+    imageMode(CORNER);
+    rectMode(CORNER);
   }
 }
 // Paint circuit
@@ -377,102 +338,167 @@ function paintCell() {
 }
 
 
-// Car movement
+
 function handleMovement() {
-  if (keyIsDown(UP_ARROW)) {
-    carSpeed += acceleration;
+
+  // RED BULL
+  if (rbState === "racing") {
+    if (keyIsDown(UP_ARROW) && !rbStarted) {
+  rbStarted = true;
+  rbStartTime = millis();
+}
+    if (keyIsDown(UP_ARROW)) {
+      rbCarSpeed += rbAcceleration;
+    }
+    if (keyIsDown(DOWN_ARROW)) {
+      rbCarSpeed -= rbAcceleration;
+    }
+    if (keyIsDown(LEFT_ARROW)) {
+      rbCarAngle -= rbTurnSpeed;
+    }
+    if (keyIsDown(RIGHT_ARROW)) {
+      rbCarAngle += rbTurnSpeed;
+    }
+
+    rbCarSpeed *= rbFriction;
+    rbCarSpeed = constrain(rbCarSpeed, -rbMaxSpeed / 2, rbMaxSpeed);
+
+    rbCarX += cos(rbCarAngle) * rbCarSpeed;
+    rbCarY += sin(rbCarAngle) * rbCarSpeed;
+
+    rbState = checkCollision(rbCarX, rbCarY);
+    if (rbState === "won") {
+      rbTime = millis() - rbStartTime;
+    }
   }
 
-  else if (keyIsDown(DOWN_ARROW)) {
-    carSpeed -= acceleration;
+  // FERRARI
+  if (sfState === "racing") {
+    if (keyIsDown("KeyW")) {
+      sfCarSpeed += sfAcceleration;
+    }
+    if (keyIsDown("KeyS")) {
+      sfCarSpeed -= sfAcceleration;
+    }
+    if (keyIsDown("KeyA")) {
+      sfCarAngle -= sfTurnSpeed;
+    }
+    if (keyIsDown("KeyD")) {
+      sfCarAngle += sfTurnSpeed;
+    }
+
+    sfCarSpeed *= sfFriction;
+    sfCarSpeed = constrain(sfCarSpeed, -sfMaxSpeed / 2, sfMaxSpeed);
+
+    sfCarX += cos(sfCarAngle) * sfCarSpeed;
+    sfCarY += sin(sfCarAngle) * sfCarSpeed;
+
+    sfState = checkCollision(sfCarX, sfCarY);
+    if (sfState === "won") {
+      sfTime = millis() - sfStartTime;
+    }
   }
 
-  carSpeed *= friction;
-
-  if (carSpeed > maxSpeed) {
-    carSpeed = maxSpeed;
+  // Game is over once neither car is still racing
+  if (rbState !== "racing" && sfState !== "racing") {
+    if (rbState === "won" && sfState === "won") {
+      winner = rbTime < sfTime ? "Red Bull" : "Ferrari";
+      gameState = "won";
+    }
+    else if (rbState === "won") {
+      winner = "Red Bull";
+      gameState = "won";
+    }
+    else if (sfState === "won") {
+      winner = "Ferrari";
+      gameState = "won";
+    }
+    else {
+      gameState = "finished";
+    }
   }
-
-  if (carSpeed < -maxSpeed / 2) {
-    carSpeed = -maxSpeed / 2;
-  }
-
-  if (keyIsDown(LEFT_ARROW)) {
-    carAngle -= turnSpeed;
-  }
-
-  if (keyIsDown(RIGHT_ARROW)) {
-    carAngle += turnSpeed;
-  }
-
-  carX += cos(carAngle) * carSpeed;
-  carY += sin(carAngle) * carSpeed;
-
-  checkCollision();
 }
 
+function timeText(name, state, started, startTime, finalTime) {
+  if (state === "crashed") {
+    return name + ": crashed";
+  }
+  if (state === "won") {
+    return name + ": " + (finalTime / 1000).toFixed(2) + " s";
+  }
+  if (!started) {
+    return name + ": 0.00 s";
+  }
+  // still racing, so show the running time
+  return name + ": " + ((millis() - startTime) / 1000).toFixed(2) + " s";
+}
+
+function drawTimes() {
+  fill("black");
+  textSize(24);
+  text(timeText("Red Bull", rbState, rbStarted, rbStartTime, rbTime), width / 2, height - 70);
+  text(timeText("Ferrari", sfState, sfStarted, sfStartTime, sfTime), width / 2, height - 35);
+}
 
 // Mouse controls
 function mousePressed() {
-
+  
   // Home button
   if (gameState !== "home" &&
-      isMouseOver(homeX, homeY, homeW, homeH)) {
-
-    gameState = "home";
-    return;
+    isMouseOver(homeX, homeY, homeW, homeH)) {
+      
+      gameState = "home";
+      return;
+    }
+    
+    // Restart button
+    if ((gameState === "playing" || gameState === "finished" || gameState === "won") && isMouseOver(restartX, restartY, restartW, restartH)) {
+      restartCircuit();
+      return;
+    }
+    
+    // Menu
+    if (gameState === "home") {
+      
+      if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
+        startCircuit(yasMarina, rbFinishLine, sfFinishLine);
+      }
+      
+      else if (isMouseOver(buttonX, buttonY + 100, buttonW, buttonH)) {
+        editCircuit(startCircuit);
+      }
+      
+      else if (isMouseOver(buttonX, buttonY + 200, buttonW, buttonH)) {
+        startCircuit(demoCircuit, rbFinishLine, sfFinishLine);
+      }
+    }
+    
+    // Editing
+    else if (gameState === "editing") {
+      paintCell();
+    }
   }
-
-  // Restart button
-  if ((gameState === "playing" || gameState === "finished" || gameState === "won") && isMouseOver(restartX, restartY, restartW, restartH)) {
-    restartCircuit();
-    return;
+  
+  
+  function mouseDragged() {
+    if (gameState === "editing") {
+      paintCell();
+    }
   }
-
-  // Menu
-  if (gameState === "home") {
-
-    if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
-      startCircuit(yasMarina, yasFinishLine);
+  
+  
+  // Keyboard controls
+  function keyPressed() {
+    // Finish line painting
+    if (key === "f" || key === "F") {
+      finishPaintMode = true;
+    }
+    
+    // Home
+    if (key === "e" || key === "E") {
+      gameState = "home";
     }
 
-    else if (isMouseOver(buttonX, buttonY + 100, buttonW, buttonH)) {
-      editCircuit(yasMarina);
-    }
-
-    else if (isMouseOver(buttonX, buttonY + 200, buttonW, buttonH)) {
-      startCircuit(demoCircuit);
-    }
-  }
-
-  // Editing
-  else if (gameState === "editing") {
-    paintCell();
-  }
-}
-
-
-function mouseDragged() {
-  if (gameState === "editing") {
-    paintCell();
-  }
-}
-
-
-// Keyboard controls
-function keyPressed() {
-
-  // Finish line painting
-  if (key === "f" || key === "F") {
-    finishPaintMode = true;
-  }
-
-  // Home
-  if (key === "e" || key === "E") {
-    gameState = "home";
-  }
-
-  // Stop arrow keys from scrolling
   if (
     key === "ArrowRight" ||
     key === "ArrowLeft" ||
@@ -490,6 +516,12 @@ function keyPressed() {
   // Zoom out
   if (key === "-") {
     enlargeCircuit(-0.1);
+  }
+
+  // Start Ferrari timer
+  if ((key === "w" || key === "W") && !sfStarted && gameState === "playing") {
+    sfStarted = true;
+    sfStartTime = millis();
   }
 }
 
@@ -524,29 +556,23 @@ function editCircuit(circuit) {
 }
 
 // Collision detection
-function checkCollision() {
+function checkCollision(carX, carY) {
   let gridX = Math.floor((carX + CELL_SIZE / 2) / CELL_SIZE);
   let gridY = Math.floor((carY + CELL_SIZE / 2) / CELL_SIZE);
 
-  // Outside grid
-  if (
-    gridX < 0 || gridX >= cols ||
-    gridY < 0 || gridY >= rows
-  ) {
-    gameState = "finished";
+  if (gridX < 0 || gridX >= cols || gridY < 0 || gridY >= rows) {
+    return "crashed";
   }
 
-  // Hit wall
-  else if (grid[gridY][gridX] === IMPASSABLE) {
-    gameState = "finished";
+  if (grid[gridY][gridX] === IMPASSABLE) {
+    return "crashed";
   }
 
-  // Crossed finish line
-  else if (grid[gridY][gridX] === FINISH_LINE
-        || grid[gridY][gridX] === DARK_FINISH
-  ) {
-    gameState = "won";
+  if (grid[gridY][gridX] === FINISH_LINE || grid[gridY][gridX] === DARK_FINISH) {
+    return "won";
   }
+
+  return "racing";
 }
 
 // Zoom
@@ -600,4 +626,96 @@ function windowResized() {
   homeY = 20;
 
   centerCircuit();
+}
+
+
+
+
+// Restart race
+function restartCircuit() {
+  if (currentCircuit) {
+    startCircuit(currentCircuit, rbFinishLine, sfFinishLine);
+  }
+}
+
+
+// Circuit template
+function startTemplate() {
+  grid = generateEmptyGrid(cols, rows);
+
+  the_player.x = 0;
+  the_player.y = 0;
+
+  grid[0][0] = PLAYER;
+
+  circuitScale = 1;
+
+  centerCircuit();
+  gameState = "editing";
+}
+
+
+// Generate empty grid
+function generateEmptyGrid(gridCols, gridRows) {
+  let newGrid = [];
+
+  for (let y = 0; y < gridRows; y++) {
+    newGrid.push([]);
+
+    for (let x = 0; x < gridCols; x++) {
+      newGrid[y].push(OPEN_TILE);
+    }
+  }
+
+  return newGrid;
+}
+
+
+// Menu
+function menuScreen() {
+  fill("black");
+  textSize(48);
+  text("Select Your Circuit", width / 2, height / 2 - 100);
+
+  drawButton("Yas Marina", buttonX, buttonY);
+  drawButton("Circuit Template", buttonX, buttonY + 100);
+  drawButton("Demo Circuit", buttonX, buttonY + 200);
+}
+
+
+function drawButton(label, bx, by) {
+  fill("black");
+  rect(bx, by, buttonW, buttonH);
+
+  fill("white");
+  textSize(24);
+  text(label, bx + buttonW / 2, by + buttonH / 2);
+}
+
+
+function drawHomeButton() {
+  fill("black");
+  rect(homeX, homeY, homeW, homeH);
+
+  fill("white");
+  textSize(20);
+  text("Home", homeX + homeW / 2, homeY + homeH / 2);
+}
+
+
+function drawRestartButton() {
+  fill("black");
+  rect(restartX, restartY, restartW, restartH);
+
+  fill("white");
+  textSize(20);
+  text("Restart", restartX + restartW / 2, restartY + restartH / 2);
+}
+
+
+function isMouseOver(bx, by, w, h) {
+  return mouseX >= bx &&
+    mouseX <= bx + w &&
+    mouseY >= by &&
+    mouseY <= by + h;
 }
