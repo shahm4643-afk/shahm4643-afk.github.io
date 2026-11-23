@@ -8,7 +8,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-// I tried to make my functions as sufficent as possible as i plan to use this exact assignment as a blueprint for my major project.
+// I tried to make my functions as sufficient as possible, as I plan to use this exact assignment as a blueprint for my major project.
 // I used cos() and sin() so each car drives in the direction it is facing.
 // I used constrain() to limit car speeds and push(), translate(), rotate(), and pop() to rotate the car images without affecting the rest of the drawing.
 // I also added separate timers and a winner system that compares both cars' times.
@@ -415,7 +415,6 @@ function drawButton(label, bx, by) {
 function drawHomeButton() {
   fill("black");
   rect(homeX, homeY, homeW, homeH);
-
   fill("white");
   textSize(20);
   text("Home", homeX + homeW / 2, homeY + homeH / 2);
@@ -482,7 +481,7 @@ function paintCell() {
 
 function drawTimes() {
   fill("black");
-  textSize(24);
+  textSize(30);
   text(timeText("Red Bull", rbState, rbStarted, rbStartTime, rbTime), width / 2, height - 70);
   text(timeText("Ferrari", sfState, sfStarted, sfStartTime, sfTime), width / 2, height - 35);
 }
@@ -492,13 +491,13 @@ function timeText(name, state, started, startTime, finalTime) {
     return name + ": crashed";
   }
   if (state === "won") {
-    return name + ": " + (finalTime / 1000).toFixed(2) + " s";
+    return name + ": " + (finalTime / 1000).toFixed(3) + " s";
   }
   if (!started) {
     return name + ": 0.00 s";
   }
   // still racing, so show the running time
-  return name + ": " + ((millis() - startTime) / 1000).toFixed(2) + " s";
+  return name + ": " + ((millis() - startTime) / 1000).toFixed(3) + " s";
 }
 
 
