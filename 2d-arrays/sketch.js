@@ -4,14 +4,19 @@
 
 // Refernces :
 // https://www.youtube.com/watch?v=Rs_rAxEsAvI 
-// https://kidscancode.org/godot_recipes/3.x/2d/car_steering/ 
+// https://kidscancode.org/godot_recipes/3.x/2d/car_steering/
+// Both of these for car physics
+
+// https://gist.github.com/AmosAidoo/8c2ff4b75184b4f5aff684af7e612a49 
+// For circuit scaling
+
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
 // I tried to make my functions as sufficient as possible, as I plan to use this exact assignment as a blueprint for my major project.
 // I used cos() and sin() so each car drives in the direction it is facing.
 // I used constrain() to limit car speeds and push(), translate(), rotate(), and pop() to rotate the car images without affecting the rest of the drawing.
-// I also added separate timers and a winner system that compares both cars' times.
+// I also added separate timers and a winner system that compares both cars' times using the "?" variable, which picks between two values based on a condition.
 
 const OPEN_TILE = 0;
 const IMPASSABLE = 1;
