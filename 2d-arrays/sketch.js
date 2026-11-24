@@ -513,31 +513,31 @@ function mousePressed() {
   if (gameState !== "home" &&
     isMouseOver(homeX, homeY, homeW, homeH)) {
       
-      gameState = "home";
-      return;
-    }
-    
-    // Restart button
+    gameState = "home";
+    return;
+  }
+  
+  // Restart button
   if ((gameState === "playing" || gameState === "finished" || gameState === "won") && isMouseOver(restartX, restartY, restartW, restartH)) {
-      restartCircuit();
-      return;
+    restartCircuit();
+    return;
+  }
+  
+  // Menu
+  if (gameState === "home") { 
+    if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
+      startCircuit(yasMarina, rbFinishLine, sfFinishLine);
     }
     
-    // Menu
-    if (gameState === "home") { 
-      if (isMouseOver(buttonX, buttonY, buttonW, buttonH)) {
-        startCircuit(yasMarina, rbFinishLine, sfFinishLine);
-      }
-      
-      else if (isMouseOver(buttonX, buttonY + 100, buttonW, buttonH)) {
-        startTemplate(); // editCircuit(startCircuit);
-      }
+    else if (isMouseOver(buttonX, buttonY + 100, buttonW, buttonH)) {
+      startTemplate(); // editCircuit(startCircuit);
     }
-    
-    // Editing
-    else if (gameState === "editing") {
-      paintCell();
-    }
+  }
+  
+  // Editing
+  else if (gameState === "editing") {
+    paintCell();
+  }
 }
   
 function mouseDragged() {
