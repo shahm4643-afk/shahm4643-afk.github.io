@@ -11,7 +11,7 @@
 // For circuit scaling
 
 // Extra for Experts:
-// - describe what you did to take this project "above and beyond"
+// - describse what you did to take this project "above and beyond"
 
 // I tried to make my functions as sufficient as possible, as I plan to use this exact assignment as a blueprint for my major project.
 // I used cos() and sin() so each car drives in the direction it is facing.
@@ -116,7 +116,7 @@ async function setup() {
 }
 
 function draw() {
-  background("lightblue");
+  background(220);
 
   if (gameState === "editing") {
     displayGrid();
@@ -555,6 +555,10 @@ function keyPressed() {
   // Home
   if (key === "e" || key === "E") {
     gameState = "home";
+  }
+
+  if (key === "r" || key === "R") {
+    restartCircuit();
   }
 
   if (
