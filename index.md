@@ -20,7 +20,9 @@
 - [Set timeout](16-timeout)
 - [Set time Interval](17-interval)
 - [Grid in Center](18-centerCanvas)
+
 - [Walker OOP](18.5-walker)
+- [Fireworks OOP](19-fireworks)
 
 ## Projects
 - [Interactive Scene](scene)
