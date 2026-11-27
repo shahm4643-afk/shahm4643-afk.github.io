@@ -7,7 +7,7 @@ class Particle {
     this.y = y,
     this.dx = random(5, -5);
     this.dy = random(5, -5);
-    this.diameter = 7;
+    this.diameter = 9;
     this.r = random(255);
     this.g = random(255);
     this.b = random(255);
@@ -26,8 +26,10 @@ class Particle {
     this.y += this.dy;
 
     this.opacity--;
+  }
 
-
+  isDead() {
+    return this.opacity <= 0;
   }
 }
 
@@ -41,8 +43,16 @@ async function setup() {
 function draw() {
   background("black");
   for (let firework of theFireworks) {
-    firework.update();
-    firework.display();
+    if (firework.isDead()) {
+      // remove it
+      let index = theFireworks.indexOf(firework);
+      theFireworks.splice(index, -1);
+    }
+    else {
+      firework.display();
+      firework.update();
+
+    }
   }
 }
 
@@ -51,5 +61,4 @@ function mousePressed() {
     let somefirworks = new Particle(mouseX, mouseY);
     theFireworks.push(somefirworks);
   }
-
 }
